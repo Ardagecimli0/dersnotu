@@ -1,0 +1,144 @@
+// Bu dosya veritabanı yapısını belirler.
+// Değişiklik yaptığında "npx prisma migrate dev" komutunu çalıştırmalısın.
+
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "mysql"  // <-- Burası "mysql" oldu
+  url      = env("DATABASE_URL")
+}
+
+// --------------------------------------
+// 1. KULLANICI YÖNETİMİ (User Management)
+// --------------------------------------
+
+enum UserRole {
+  STUDENT // Standart Öğrenci
+  ADMIN   // Yönetici / Editör
+}
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  username      String    @unique // Profil linki için: dersnotu.net/u/ahmet
+  passwordHash  String
+  role          UserRole  @default(STUDENT)
+  
+  // Gamification (Oyunlaştırma)
+  currentPoints Int       @default(0) // Harcanabilir güncel puan
+  totalPoints   Int       @default(0) // Kazanılmış toplam puan (Rütbe için)
+  
+  // İlişkiler
+  notes         Note[]
+  transactions  PointTransaction[]
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("users")
+}
+
+// --------------------------------------
+// 2. İÇERİK HİYERARŞİSİ (Lise Müfredatı)
+// Yapı: Sınıf (9. Sınıf) -> Ders (Matematik) -> Konu (Kümeler) -> Not
+// --------------------------------------
+
+model Grade { // Örn: 9. Sınıf, 10. Sınıf, TYT
+  id        Int      @id @default(autoincrement())
+  name      String   @unique // "9. Sınıf"
+  slug      String   @unique // "9-sinif" (URL için)
+  lessons   Lesson[]
+
+  @@map("grades")
+}
+
+model Lesson { // Örn: Matematik, Fizik
+  id        Int      @id @default(autoincrement())
+  name      String   // "Matematik"
+  slug      String   // "matematik"
+  
+  gradeId   Int
+  grade     Grade    @relation(fields: [gradeId], references: [id])
+  topics    Topic[]
+
+  // Aynı sınıfın içinde aynı ders isminden bir tane olabilir
+  @@unique([gradeId, slug]) 
+  @@map("lessons")
+}
+
+model Topic { // Örn: Kümeler, Vektörler
+  id        Int      @id @default(autoincrement())
+  name      String   // "Kümeler"
+  slug      String   // "kumeler"
+  
+  lessonId  Int
+  lesson    Lesson   @relation(fields: [lessonId], references: [id])
+  notes     Note[]
+
+  // Aynı dersin içinde aynı konu isminden bir tane olabilir
+  @@unique([lessonId, slug])
+  @@map("topics")
+}
+
+// --------------------------------------
+// 3. NOTLAR VE ONAY SÜRECİ
+// --------------------------------------
+
+enum NoteStatus {
+  PENDING   // Onay bekliyor (Admin paneline düşer)
+  APPROVED  // Yayında (Puan kazanıldı)
+  REJECTED  // Reddedildi
+}
+
+model Note {
+  id          String     @id @default(uuid())
+  title       String
+  content     String?    @db.Text // İsteğe bağlı açıklama metni
+  fileUrl     String?    // PDF veya Resim linki
+  slug        String     @unique // "vektorler-ders-notu-ahmet" (SEO için)
+  
+  status      NoteStatus @default(PENDING)
+  rejectionReason String? // Reddedilirse neden reddedildiği
+
+  // İstatistikler
+  viewCount   Int        @default(0)
+  likeCount   Int        @default(0)
+
+  // İlişkiler
+  uploaderId  String
+  uploader    User       @relation(fields: [uploaderId], references: [id])
+  
+  topicId     Int
+  topic       Topic      @relation(fields: [topicId], references: [id])
+
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([status]) // Admin panelinde "Bekleyenleri Getir" sorgusu hızlı çalışsın diye
+  @@map("notes")
+}
+
+// --------------------------------------
+// 4. PUAN SİSTEMİ (Muhasebe Kaydı)
+// --------------------------------------
+
+enum TransactionType {
+  EARN_UPLOAD   // Not yükleyerek kazanma
+  SPEND_REWARD  // Ödül alarak harcama
+  ADMIN_ADJUST  // Admin manuel müdahale
+}
+
+model PointTransaction {
+  id          String          @id @default(uuid())
+  userId      String
+  user        User            @relation(fields: [userId], references: [id])
+  
+  amount      Int             // +10, -50 vs.
+  type        TransactionType
+  description String?         // "Fizik notu onayı"
+
+  createdAt   DateTime        @default(now())
+
+  @@map("point_transactions")
+}
