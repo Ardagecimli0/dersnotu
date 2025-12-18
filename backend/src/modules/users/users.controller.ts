@@ -6,10 +6,13 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('users')
 export class UsersController {
@@ -23,6 +26,27 @@ export class UsersController {
   @Get()
   findAll() {
     return this.usersService.findAll();
+  }
+
+  // Profil bilgilerini getir (özel route'lar önce gelmeli)
+  @Get('profile')
+  @UseGuards(AuthGuard('jwt'))
+  getProfile(@Req() req: any) {
+    return this.usersService.getProfile(req.user.userId);
+  }
+
+  // Kullanıcının notlarını getir (özel route'lar önce gelmeli)
+  @Get('profile/notes')
+  @UseGuards(AuthGuard('jwt'))
+  getUserNotes(@Req() req: any) {
+    return this.usersService.getUserNotes(req.user.userId);
+  }
+
+  // Profil güncelle
+  @Patch('profile')
+  @UseGuards(AuthGuard('jwt'))
+  updateProfile(@Req() req: any, @Body() updateDto: { profileImage?: string; bio?: string; username?: string }) {
+    return this.usersService.updateProfile(req.user.userId, updateDto);
   }
 
   @Get(':id')

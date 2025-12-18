@@ -21,6 +21,8 @@ import {
   ChevronDown,
   Target,
   Layers,
+  User,
+  LogOut,
 } from 'lucide-react';
 import { notesApi, Note } from '@/lib/api';
 
@@ -43,6 +45,13 @@ const getLessonImage = (lessonName: string, topicName?: string) => {
         gradient: 'from-indigo-500 via-blue-500 to-cyan-500',
         icon: '🔢',
         bgColor: 'bg-indigo-500'
+      };
+    }
+    if (topic.includes('türev') || topic.includes('trev')) {
+      return {
+        gradient: 'from-blue-600 via-indigo-600 to-purple-700',
+        icon: '📈',
+        bgColor: 'bg-blue-600'
       };
     }
     return {
@@ -232,6 +241,9 @@ export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLesson, setSelectedLesson] = useState<string>('');
   const [selectedGrade, setSelectedGrade] = useState<string>('');
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [userName, setUserName] = useState<string>('');
+  const [showUserMenu, setShowUserMenu] = useState(false);
   const [stats, setStats] = useState({
     totalNotes: 0,
     totalViews: 0,
@@ -242,8 +254,14 @@ export default function HomePage() {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
-      router.push('/dashboard');
-      return;
+      // Kullanıcı bilgilerini al
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        setUserRole(payload.role);
+        setUserName(payload.username || payload.email || 'Kullanıcı');
+      } catch {
+        // JWT decode hatası
+      }
     }
 
     const fetchNotes = async () => {
@@ -303,6 +321,19 @@ export default function HomePage() {
     fetchNotes();
   }, [router, selectedLesson, selectedGrade]);
 
+  // Menü dışına tıklanınca kapat
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (showUserMenu && !target.closest('.user-menu-container')) {
+        setShowUserMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showUserMenu]);
+
   const filteredNotes = notes.filter(note => 
     note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     note.topic?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -342,18 +373,73 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Auth Buttons - Right */}
+            {/* Auth Buttons / User Menu - Right */}
             <div className="flex-1 flex justify-end items-center space-x-4 ml-4">
-              <Link href="/login">
-                <Button variant="ghost" className="text-gray-700 hover:text-[#3B82F6]">
-                  Giriş Yap
-                </Button>
-              </Link>
-              <Link href="/register">
-                <Button className="bg-[#3B82F6] hover:bg-[#2563EB] text-white">
-                  Kayıt Ol
-                </Button>
-              </Link>
+              {!userRole ? (
+                <>
+                  <Link href="/login">
+                    <Button variant="ghost" className="text-gray-700 hover:text-[#3B82F6]">
+                      Giriş Yap
+                    </Button>
+                  </Link>
+                  <Link href="/register">
+                    <Button className="bg-[#3B82F6] hover:bg-[#2563EB] text-white">
+                      Kayıt Ol
+                    </Button>
+                  </Link>
+                </>
+              ) : userRole === 'ADMIN' ? (
+                <Link href="/admin">
+                  <Button variant="outline" size="sm">
+                    Admin Panel
+                  </Button>
+                </Link>
+              ) : (
+                <div className="relative user-menu-container">
+                  <button
+                    onClick={() => setShowUserMenu(!showUserMenu)}
+                    className="flex items-center gap-2 p-2 rounded-full hover:bg-gray-100 transition-colors"
+                  >
+                    <div className="h-8 w-8 rounded-full bg-[#3B82F6] flex items-center justify-center text-white font-semibold text-sm">
+                      {userName.charAt(0).toUpperCase()}
+                    </div>
+                  </button>
+                  {showUserMenu && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50 user-menu-container">
+                      <Link 
+                        href="/dashboard" 
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                        onClick={() => setShowUserMenu(false)}
+                      >
+                        <FileText className="h-4 w-4" />
+                        Not Yükle
+                      </Link>
+                      <Link 
+                        href="/profile" 
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                        onClick={() => setShowUserMenu(false)}
+                      >
+                        <User className="h-4 w-4" />
+                        Profil
+                      </Link>
+                      <button
+                        onClick={() => {
+                          localStorage.removeItem('token');
+                          localStorage.removeItem('userRole');
+                          setUserRole(null);
+                          setUserName('');
+                          setShowUserMenu(false);
+                          router.push('/');
+                        }}
+                        className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                      >
+                        <LogOut className="h-4 w-4" />
+                        Çıkış Yap
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
