@@ -148,7 +148,7 @@ export const notesApi = {
   getAllForAdmin: () =>
     apiClient.get<Note[]>('/notes/admin/all'),
   
-  create: (data: { title: string; content?: string; topicId: number; fileUrl?: string }) =>
+  create: (data: { title: string; content?: string; topicId?: number; topicName?: string; lessonId?: number; fileUrl?: string }) =>
     apiClient.post('/notes', data),
   
   approve: (id: string) =>
@@ -165,8 +165,27 @@ export const notesApi = {
 };
 
 // Users API
+export interface UserProfile {
+  id: string;
+  email: string;
+  username: string;
+  role: string;
+  profileImage?: string;
+  bio?: string;
+  currentPoints: number;
+  totalPoints: number;
+  createdAt: string;
+  updatedAt: string;
+  _count?: {
+    notes: number;
+  };
+}
+
 export const usersApi = {
-  getProfile: () => apiClient.get('/users/profile'),
+  getProfile: () => apiClient.get<UserProfile>('/users/profile'),
+  updateProfile: (data: { profileImage?: string; bio?: string; username?: string }) =>
+    apiClient.patch<UserProfile>('/users/profile', data),
+  getUserNotes: () => apiClient.get<Note[]>('/users/profile/notes'),
 };
 
 // Grades API

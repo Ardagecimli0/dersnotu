@@ -31,6 +31,13 @@ const getLessonImage = (lessonName: string, topicName?: string) => {
         bgColor: 'bg-blue-500'
       };
     }
+    if (topic.includes('türev') || topic.includes('trev')) {
+      return {
+        gradient: 'from-blue-600 via-indigo-600 to-purple-700',
+        icon: '📈',
+        bgColor: 'bg-blue-600'
+      };
+    }
     return {
       gradient: 'from-blue-500 to-purple-600',
       icon: '📐',

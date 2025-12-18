@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { notesApi, usersApi, gradesApi } from '@/lib/api';
-import { ChevronDown, Upload, Image as ImageIcon } from 'lucide-react';
+import { ChevronDown, Upload, Image as ImageIcon, User, LogOut, FileText } from 'lucide-react';
 
 interface Note {
   id: string;
@@ -61,10 +61,12 @@ export default function DashboardPage() {
   const [fileUrl, setFileUrl] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [userName, setUserName] = useState<string>('');
+  const [showUserMenu, setShowUserMenu] = useState(false);
   const [grades, setGrades] = useState<Grade[]>([]);
   const [selectedGradeId, setSelectedGradeId] = useState<number | null>(null);
   const [selectedLessonId, setSelectedLessonId] = useState<number | null>(null);
-  const [selectedTopicId, setSelectedTopicId] = useState<number | null>(null);
+  const [topicName, setTopicName] = useState<string>('');
   const router = useRouter();
 
   useEffect(() => {
@@ -76,16 +78,19 @@ export default function DashboardPage() {
 
     const fetchData = async () => {
       try {
-        // Decode JWT to get user role (simple approach)
+        // Decode JWT to get user role and username
         const token = localStorage.getItem('token');
         if (token) {
           try {
             const payload = JSON.parse(atob(token.split('.')[1]));
             setUserRole(payload.role);
+            setUserName(payload.username || payload.email || 'Kullanıcı');
           } catch {
             // If decode fails, try to get from API
             const profile = await usersApi.getProfile();
-            setUserRole((profile as any).role);
+            const profileData = profile as any;
+            setUserRole(profileData.role);
+            setUserName(profileData.username || profileData.email || 'Kullanıcı');
           }
         }
 
@@ -105,10 +110,23 @@ export default function DashboardPage() {
     fetchData();
   }, [router]);
 
+  // Menü dışına tıklanınca kapat
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (showUserMenu && !target.closest('.user-menu-container')) {
+        setShowUserMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showUserMenu]);
+
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim() || !selectedTopicId) {
-      alert('Lütfen başlık ve konu seçin');
+    if (!title.trim() || !selectedGradeId || !selectedLessonId || !topicName.trim()) {
+      alert('Lütfen başlık, sınıf, ders ve konu bilgilerini girin');
       return;
     }
 
@@ -117,17 +135,17 @@ export default function DashboardPage() {
       await notesApi.create({
         title,
         content: content || undefined,
-        topicId: selectedTopicId,
-        fileUrl: fileUrl || undefined,
-        imageUrl: imageUrl || undefined,
+        topicName: topicName,
+        lessonId: selectedLessonId!,
+        fileUrl: fileUrl || imageUrl || undefined,
       });
       setTitle('');
       setContent('');
       setImageUrl('');
       setFileUrl('');
+      setTopicName('');
       setSelectedGradeId(null);
       setSelectedLessonId(null);
-      setSelectedTopicId(null);
       // Refresh notes
       const fetchedNotes = await notesApi.getAll();
       setNotes(fetchedNotes as Note[]);
@@ -146,7 +164,8 @@ export default function DashboardPage() {
 
   const handleLogout = () => {
     localStorage.removeItem('token');
-    router.push('/login');
+    localStorage.removeItem('userRole');
+    router.push('/');
   };
 
   if (isLoading) {
@@ -177,9 +196,40 @@ export default function DashboardPage() {
                   </Button>
                 </Link>
               )}
-              <Button onClick={handleLogout} variant="outline" size="sm">
-                Çıkış Yap
-              </Button>
+              {userRole !== 'ADMIN' && (
+                <div className="relative user-menu-container">
+                  <button
+                    onClick={() => setShowUserMenu(!showUserMenu)}
+                    className="flex items-center gap-2 p-2 rounded-full hover:bg-gray-100 transition-colors"
+                  >
+                    <div className="h-8 w-8 rounded-full bg-[#3B82F6] flex items-center justify-center text-white font-semibold">
+                      {userName.charAt(0).toUpperCase()}
+                    </div>
+                  </button>
+                  {showUserMenu && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50 user-menu-container">
+                      <Link href="/dashboard" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                        <FileText className="h-4 w-4" />
+                        Not Yükle
+                      </Link>
+                      <Link href="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                        <User className="h-4 w-4" />
+                        Profil
+                      </Link>
+                      <button
+                        onClick={() => {
+                          handleLogout();
+                          setShowUserMenu(false);
+                        }}
+                        className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                      >
+                        <LogOut className="h-4 w-4" />
+                        Çıkış Yap
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -264,27 +314,23 @@ export default function DashboardPage() {
                     </div>
                   )}
 
-                  {/* Konu Seçimi */}
+                  {/* Konu Input */}
                   {selectedLesson && (
                     <div className="space-y-2">
                       <Label htmlFor="topic">Konu *</Label>
-                      <div className="relative">
-                        <select
-                          id="topic"
-                          value={selectedTopicId || ''}
-                          onChange={(e) => setSelectedTopicId(e.target.value ? parseInt(e.target.value) : null)}
-                          className="w-full p-2 border border-gray-300 rounded-md appearance-none bg-white pr-8"
-                          required
-                        >
-                          <option value="">Konu seçin</option>
-                          {availableTopics.map((topic) => (
-                            <option key={topic.id} value={topic.id}>
-                              {topic.name}
-                            </option>
-                          ))}
-                        </select>
-                        <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
-                      </div>
+                      <Input
+                        id="topic"
+                        type="text"
+                        value={topicName}
+                        onChange={(e) => setTopicName(e.target.value)}
+                        placeholder="Konu adını yazın (örn: Kümeler, Türev, Atom)"
+                        required
+                      />
+                      {availableTopics.length > 0 && (
+                        <p className="text-xs text-gray-500">
+                          Önerilen konular: {availableTopics.map(t => t.name).join(', ')}
+                        </p>
+                      )}
                     </div>
                   )}
 

@@ -20,6 +20,10 @@ model User {
   passwordHash  String
   role          String    @default("STUDENT") // STUDENT veya ADMIN
   
+  // Profil Bilgileri
+  profileImage  String?   // Profil resmi URL'i
+  bio           String?   // Kullanıcı açıklaması
+  
   // Gamification (Oyunlaştırma)
   currentPoints Int       @default(0) // Harcanabilir güncel puan
   totalPoints   Int       @default(0) // Kazanılmış toplam puan (Rütbe için)

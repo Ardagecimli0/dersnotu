@@ -8,26 +8,77 @@ import defaultSlugify from 'slugify';
 export class NotesService {
   constructor(private prisma: PrismaService) {}
 
-  async create(userId: string, createNoteDto: CreateNoteDto) {
-    // 1. Slug Oluşturma (SEO İçin)
-    // Aynı isimde not varsa sonuna rastgele sayı ekleyelim ki çakışmasın.
+  async create(userId: string, createNoteDto: CreateNoteDto & { topicName?: string; lessonId?: number }) {
+    // 1. Konu ID'sini bul veya oluştur
+    let topicId = createNoteDto.topicId;
+    
+    // Eğer topicName ve lessonId verilmişse, konuyu bul veya oluştur
+    if (!topicId && createNoteDto.topicName && createNoteDto.lessonId) {
+      const topicSlug = defaultSlugify(createNoteDto.topicName, {
+        lower: true,
+        strict: true,
+      });
+      
+      // Konuyu bul veya oluştur
+      const topic = await this.prisma.topic.upsert({
+        where: {
+          lessonId_slug: {
+            lessonId: createNoteDto.lessonId,
+            slug: topicSlug,
+          },
+        },
+        update: {},
+        create: {
+          name: createNoteDto.topicName,
+          slug: topicSlug,
+          lessonId: createNoteDto.lessonId,
+        },
+      });
+      
+      topicId = topic.id;
+    }
+
+    if (!topicId) {
+      throw new BadRequestException('Konu bilgisi bulunamadı');
+    }
+
+    // 2. Slug Oluşturma (SEO İçin)
     const rawSlug = defaultSlugify(createNoteDto.title, {
       lower: true,
       strict: true,
     });
-    const uniqueSuffix = Date.now().toString().slice(-4); // Son 4 hane
+    const uniqueSuffix = Date.now().toString().slice(-4);
     const finalSlug = `${rawSlug}-${uniqueSuffix}`;
 
-    // 2. Veritabanına Kayıt
-    // Status varsayılan olarak "PENDING" olacak (Schema'da öyle ayarladık)
+    // 3. Veritabanına Kayıt
     const newNote = await this.prisma.note.create({
       data: {
         title: createNoteDto.title,
         content: createNoteDto.content || '',
         fileUrl: createNoteDto.fileUrl,
-        topicId: createNoteDto.topicId, // Hangi konu (Örn: Kümeler)
-        uploaderId: userId, // Kim yükledi?
+        topicId: topicId,
+        uploaderId: userId,
         slug: finalSlug,
+      },
+    });
+
+    // 4. Kullanıcıya XP ekle (Not yükleme için +10 XP)
+    const uploadPoints = 10;
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        currentPoints: { increment: uploadPoints },
+        totalPoints: { increment: uploadPoints },
+      },
+    });
+
+    // 5. İşlem kaydı oluştur
+    await this.prisma.pointTransaction.create({
+      data: {
+        userId,
+        amount: uploadPoints,
+        type: 'EARN_UPLOAD',
+        description: `Not yükleme: ${createNoteDto.title}`,
       },
     });
 
