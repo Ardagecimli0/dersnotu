@@ -1,5 +1,9 @@
 // src/modules/auth/auth.service.ts
-import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../../providers/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
@@ -18,7 +22,8 @@ export class AuthService {
     const existingUser = await this.prisma.user.findUnique({
       where: { email: dto.email },
     });
-    if (existingUser) throw new BadRequestException('Bu email zaten kullanımda.');
+    if (existingUser)
+      throw new BadRequestException('Bu email zaten kullanımda.');
 
     // b. Şifreyi Hashle
     const hashedPassword = await bcrypt.hash(dto.password, 10);
