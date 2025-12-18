@@ -5,25 +5,20 @@ generator client {
   provider = "prisma-client-js"
 }
 datasource db {
-  provider = "mysql"  // <-- Burası "mysql" oldu
-  url      = env("DATABASE_URL")
+  provider = "mysql"
+  url      = "mysql://root:1234@localhost:3306/dersnotu_db"
 }
 
 // --------------------------------------
 // 1. KULLANICI YÖNETİMİ (User Management)
 // --------------------------------------
 
-enum UserRole {
-  STUDENT // Standart Öğrenci
-  ADMIN   // Yönetici / Editör
-}
-
 model User {
   id            String    @id @default(uuid())
   email         String    @unique
   username      String    @unique // Profil linki için: dersnotu.net/u/ahmet
   passwordHash  String
-  role          UserRole  @default(STUDENT)
+  role          String    @default("STUDENT") // STUDENT veya ADMIN
   
   // Gamification (Oyunlaştırma)
   currentPoints Int       @default(0) // Harcanabilir güncel puan
@@ -85,20 +80,14 @@ model Topic { // Örn: Kümeler, Vektörler
 // 3. NOTLAR VE ONAY SÜRECİ
 // --------------------------------------
 
-enum NoteStatus {
-  PENDING   // Onay bekliyor (Admin paneline düşer)
-  APPROVED  // Yayında (Puan kazanıldı)
-  REJECTED  // Reddedildi
-}
-
 model Note {
   id          String     @id @default(uuid())
   title       String
-  content     String?    @db.Text // İsteğe bağlı açıklama metni
+  content     String?    // İsteğe bağlı açıklama metni
   fileUrl     String?    // PDF veya Resim linki
   slug        String     @unique // "vektorler-ders-notu-ahmet" (SEO için)
   
-  status      NoteStatus @default(PENDING)
+  status      String     @default("PENDING") // PENDING, APPROVED veya REJECTED
   rejectionReason String? // Reddedilirse neden reddedildiği
 
   // İstatistikler
@@ -123,20 +112,14 @@ model Note {
 // 4. PUAN SİSTEMİ (Muhasebe Kaydı)
 // --------------------------------------
 
-enum TransactionType {
-  EARN_UPLOAD   // Not yükleyerek kazanma
-  SPEND_REWARD  // Ödül alarak harcama
-  ADMIN_ADJUST  // Admin manuel müdahale
-}
-
 model PointTransaction {
-  id          String          @id @default(uuid())
+  id          String   @id @default(uuid())
   userId      String
-  user        User            @relation(fields: [userId], references: [id])
+  user        User     @relation(fields: [userId], references: [id])
   
-  amount      Int             // +10, -50 vs.
-  type        TransactionType
-  description String?         // "Fizik notu onayı"
+  amount      Int      // +10, -50 vs.
+  type        String   // EARN_UPLOAD, SPEND_REWARD veya ADMIN_ADJUST
+  description String?  // "Fizik notu onayı"
 
   createdAt   DateTime        @default(now())
 

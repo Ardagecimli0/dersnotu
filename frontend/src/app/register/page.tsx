@@ -1,0 +1,94 @@
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { authApi } from '@/lib/api';
+
+export default function RegisterPage() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const router = useRouter();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError('');
+
+    try {
+      await authApi.register({ email, password, username });
+      router.push('/login?message=Kayıt başarılı! Giriş yapabilirsiniz.');
+    } catch (err) {
+      setError('Kayıt başarısız. Lütfen bilgilerinizi kontrol edin.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-bold text-center">DersNotu.net</CardTitle>
+          <CardDescription className="text-center">
+            Yeni hesap oluşturun
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="username">Kullanıcı Adı</Label>
+              <Input
+                id="username"
+                type="text"
+                placeholder="kullaniciadi"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">E-posta</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="ornek@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Şifre</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+            {error && (
+              <div className="text-red-500 text-sm text-center">{error}</div>
+            )}
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? 'Kayıt yapılıyor...' : 'Kayıt Ol'}
+            </Button>
+          </form>
+          <div className="mt-4 text-center text-sm">
+            Zaten hesabınız var mı?{' '}
+            <a href="/login" className="text-blue-600 hover:underline">
+              Giriş yapın
+            </a>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
