@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { notesApi, Note } from '@/lib/api';
+import { Footer } from '@/components/footer';
 import { 
   ArrowLeft, 
   Eye, 
@@ -388,6 +389,7 @@ export default function NoteDetailPage() {
           </CardContent>
         </Card>
       </main>
+      <Footer />
     </div>
   );
 }

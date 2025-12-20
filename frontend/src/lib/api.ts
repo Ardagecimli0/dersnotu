@@ -45,21 +45,40 @@ class ApiClient {
 
     try {
       const response = await fetch(url, config);
-      console.log('API Response Status:', response.status, response.statusText);
-
+      
       if (!response.ok) {
         const errorText = await response.text();
+        
+        // 401 Unauthorized hatası için özel işlem
+        if (response.status === 401) {
+          // Token'ı temizle
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('token');
+          }
+          // Özel bir hata oluştur ki frontend'de yakalansın
+          const error = new Error('Unauthorized');
+          (error as any).status = 401;
+          (error as any).response = errorText;
+          throw error;
+        }
+        
+        // Diğer hatalar için normal log
         console.error('API Error Response:', errorText);
-        throw new Error(`API Error: ${response.status} ${response.statusText}`);
+        const error = new Error(`API Error: ${response.status} ${response.statusText}`);
+        (error as any).status = response.status;
+        (error as any).response = errorText;
+        throw error;
       }
 
       return response.json();
     } catch (error) {
-      console.error('Fetch Error Details:', {
-        url,
-        error: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined,
-      });
+      // 401 hatası için detaylı log gösterme (zaten işlendi)
+      if ((error as any)?.status !== 401) {
+        console.error('Fetch Error Details:', {
+          url,
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
       throw error;
     }
   }

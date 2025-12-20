@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { usersApi, UserProfile, Note } from '@/lib/api';
+import { Footer } from '@/components/footer';
 import { User, Edit2, Upload, Trophy, FileText, Eye, Heart, Calendar, BookOpen, GraduationCap } from 'lucide-react';
 import Link from 'next/link';
 import { ChevronDown, LogOut, Shield } from 'lucide-react';
@@ -69,11 +70,15 @@ export default function ProfilePage() {
           profileImage: profileData.profileImage || '',
         });
       } catch (error: any) {
-        console.error('Veriler yüklenemedi:', error);
-        if (error?.message?.includes('401') || error?.message?.includes('Unauthorized')) {
-          localStorage.removeItem('token');
+        // 401 Unauthorized hatası için sessizce login'e yönlendir
+        if (error?.status === 401 || error?.message?.includes('401') || error?.message?.includes('Unauthorized')) {
+          // Token zaten API client tarafından temizlendi, sadece yönlendir
           router.push('/login');
+          return;
         }
+        
+        // Diğer hatalar için log göster
+        console.error('Veriler yüklenemedi:', error);
       } finally {
         setIsLoading(false);
       }
@@ -453,6 +458,7 @@ export default function ProfilePage() {
           </CardContent>
         </Card>
       </div>
+      <Footer />
     </div>
   );
 }
