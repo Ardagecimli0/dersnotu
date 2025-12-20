@@ -25,6 +25,7 @@ import {
   LogOut,
 } from 'lucide-react';
 import { notesApi, Note } from '@/lib/api';
+import { Footer } from '@/components/footer';
 
 // Konu ve derse göre görsel ve renk eşleştirmesi
 const getLessonImage = (lessonName: string, topicName?: string) => {
@@ -524,7 +525,7 @@ export default function HomePage() {
         <section className="mb-12">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Son Eklenen Notlar</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Ücretsiz Ders Notları</h2>
               <p className="text-gray-600">Onaylanmış ders notlarını keşfedin</p>
             </div>
           </div>
@@ -837,22 +838,7 @@ export default function HomePage() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-gray-200 mt-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="text-center">
-            <div className="flex items-center justify-center space-x-2 mb-4">
-              <Image src="/logo.png" alt="DersNotu.net" width={32} height={32} />
-              <span className="text-xl font-bold text-gray-900">DersNotu.net</span>
-            </div>
-            <p className="text-gray-600 mb-4">
-              Öğrenciler için öğrenciler tarafından tasarlandı.
-            </p>
-            <div className="text-gray-500 text-sm">
-              © 2024 DersNotu.net. Tüm hakları saklıdır.
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

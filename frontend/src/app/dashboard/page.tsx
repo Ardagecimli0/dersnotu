@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { notesApi, usersApi, gradesApi } from '@/lib/api';
 import { ChevronDown, Upload, Image as ImageIcon, User, LogOut, FileText } from 'lucide-react';
+import { Footer } from '@/components/footer';
 
 interface Note {
   id: string;
@@ -87,10 +88,14 @@ export default function DashboardPage() {
             setUserName(payload.username || payload.email || 'Kullanıcı');
           } catch {
             // If decode fails, try to get from API
-            const profile = await usersApi.getProfile();
-            const profileData = profile as any;
-            setUserRole(profileData.role);
-            setUserName(profileData.username || profileData.email || 'Kullanıcı');
+            try {
+              const profile = await usersApi.getProfile();
+              setUserRole(profile.role);
+              setUserName(profile.username || profile.email || 'Kullanıcı');
+            } catch (apiError: unknown) {
+              // API hatası için özel işlem yapma, ana catch bloğu yakalayacak
+              throw apiError;
+            }
           }
         }
 
@@ -100,7 +105,13 @@ export default function DashboardPage() {
 
         const fetchedNotes = await notesApi.getAll();
         setNotes(fetchedNotes as Note[]);
-      } catch (error) {
+      } catch (error: any) {
+        // 401 Unauthorized hatası için sessizce login'e yönlendir
+        if (error?.status === 401 || error?.message?.includes('401') || error?.message?.includes('Unauthorized')) {
+          router.push('/login');
+          return;
+        }
+        // Diğer hatalar için log göster
         console.error('Veriler yüklenemedi:', error);
       } finally {
         setIsLoading(false);
@@ -151,6 +162,12 @@ export default function DashboardPage() {
       setNotes(fetchedNotes as Note[]);
       alert('Not başarıyla gönderildi! Onay bekleniyor.');
     } catch (error: any) {
+      // 401 Unauthorized hatası için sessizce login'e yönlendir
+      if (error?.status === 401 || error?.message?.includes('401') || error?.message?.includes('Unauthorized')) {
+        router.push('/login');
+        return;
+      }
+      // Diğer hatalar için kullanıcıya bildir
       alert(error.message || 'Not yüklenemedi');
       console.error('Not yüklenemedi:', error);
     } finally {
@@ -270,7 +287,7 @@ export default function DashboardPage() {
                           const gradeId = e.target.value ? parseInt(e.target.value) : null;
                           setSelectedGradeId(gradeId);
                           setSelectedLessonId(null);
-                          setSelectedTopicId(null);
+                          setTopicName('');
                         }}
                         className="w-full p-2 border border-gray-300 rounded-md appearance-none bg-white pr-8"
                         required
@@ -297,7 +314,7 @@ export default function DashboardPage() {
                           onChange={(e) => {
                             const lessonId = e.target.value ? parseInt(e.target.value) : null;
                             setSelectedLessonId(lessonId);
-                            setSelectedTopicId(null);
+                            setTopicName('');
                           }}
                           className="w-full p-2 border border-gray-300 rounded-md appearance-none bg-white pr-8"
                           required
@@ -447,6 +464,7 @@ export default function DashboardPage() {
           </div>
         </div>
       </main>
+      <Footer />
     </div>
   );
 }
