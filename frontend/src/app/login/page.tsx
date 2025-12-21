@@ -23,7 +23,7 @@ export default function LoginPage() {
     try {
       const response = await authApi.login({ email, password });
       localStorage.setItem('token', response.access_token);
-      router.push('/dashboard');
+      router.push('/');
     } catch (err) {
       setError('Giriş başarısız. Lütfen bilgilerinizi kontrol edin.');
     } finally {

@@ -23,9 +23,17 @@ import {
   Layers,
   User,
   LogOut,
+  X,
+  Trophy,
 } from 'lucide-react';
 import { notesApi, Note } from '@/lib/api';
 import { Footer } from '@/components/footer';
+import { 
+  WebsiteStructuredData, 
+  OrganizationStructuredData, 
+  EducationalOrganizationStructuredData,
+  FAQStructuredData 
+} from '@/components/structured-data';
 
 // Konu ve derse göre görsel ve renk eşleştirmesi
 const getLessonImage = (lessonName: string, topicName?: string) => {
@@ -245,6 +253,7 @@ export default function HomePage() {
   const [userRole, setUserRole] = useState<string | null>(null);
   const [userName, setUserName] = useState<string>('');
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [stats, setStats] = useState({
     totalNotes: 0,
     totalViews: 0,
@@ -342,7 +351,14 @@ export default function HomePage() {
   );
 
   return (
-    <div className="min-h-screen bg-[#F9FAFB]">
+    <>
+      {/* SEO Structured Data */}
+      <WebsiteStructuredData />
+      <OrganizationStructuredData />
+      <EducationalOrganizationStructuredData />
+      <FAQStructuredData />
+      
+      <div className="min-h-screen bg-[#F9FAFB]">
       {/* Glassmorphism Navbar with Logo and Search */}
       <header className="sticky top-0 z-50 backdrop-blur-md bg-white/80 border-b border-gray-200/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -360,9 +376,10 @@ export default function HomePage() {
               </Link>
             </div>
             
-            {/* Search Bar - Right */}
+            {/* Search Bar - Desktop: full, Mobile: icon only */}
             <div className="flex-1 flex justify-end">
-              <div className="relative w-full max-w-md">
+              {/* Desktop Search */}
+              <div className="hidden md:block relative w-full max-w-md">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                 <Input
                   type="text"
@@ -372,6 +389,14 @@ export default function HomePage() {
                   className="pl-10 pr-4 py-2 w-full border-gray-200 rounded-xl focus:border-[#3B82F6] focus:ring-[#3B82F6]"
                 />
               </div>
+              
+              {/* Mobile Search Icon */}
+              <button
+                className="md:hidden p-2 rounded-full hover:bg-gray-100 transition-colors"
+                onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
+              >
+                <Search className="h-6 w-6 text-gray-600" />
+              </button>
             </div>
 
             {/* Auth Buttons / User Menu - Right */}
@@ -423,6 +448,14 @@ export default function HomePage() {
                         <User className="h-4 w-4" />
                         Profil
                       </Link>
+                      <Link 
+                        href="/leaderboard" 
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                        onClick={() => setShowUserMenu(false)}
+                      >
+                        <Trophy className="h-4 w-4" />
+                        Liderlik Tablosu
+                      </Link>
                       <button
                         onClick={() => {
                           localStorage.removeItem('token');
@@ -446,18 +479,48 @@ export default function HomePage() {
         </div>
       </header>
 
+      {/* Mobile Search Overlay */}
+      {mobileSearchOpen && (
+        <div className="fixed top-20 left-0 right-0 bg-white border-b border-gray-200 p-4 md:hidden z-40 shadow-lg">
+          <div className="relative max-w-7xl mx-auto">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <Input
+              type="text"
+              placeholder="Not ara..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 pr-10 py-2 w-full border-gray-200 rounded-xl focus:border-[#3B82F6] focus:ring-[#3B82F6]"
+              autoFocus
+            />
+            <button
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              onClick={() => setMobileSearchOpen(false)}
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+      )}
+
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Hero Section with Stats */}
         <section className="mb-12">
           <div className="text-center mb-8">
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-              Ders Notlarını
-              <span className="text-[#3B82F6]"> Paylaş</span> ve
-              <span className="text-[#3B82F6]"> Öğren</span>
+              <span className="text-[#3B82F6]">Ücretsiz Lise Ders Notları</span>
+              <br className="hidden md:block" />
+              <span className="text-gray-900">YKS, TYT, AYT Hazırlık</span>
             </h1>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Öğrenciler için tasarlanmış modern ders notu paylaşım platformu. 
-              Notlarını paylaş, puan kazan, binlerce öğrencinin notlarından faydalan.
+            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+              9, 10, 11 ve 12. sınıf ders notları ile YKS sınavına hazırlan. 
+              Matematik, Fizik, Kimya, Biyoloji, Türkçe, Tarih ve Coğrafya derslerinde 
+              binlerce ücretsiz not seni bekliyor. Notlarını paylaş, puan kazan!
+            </p>
+            {/* SEO için gizli anahtar kelimeler */}
+            <p className="sr-only">
+              Lise ders notları, YKS notları, TYT notları, AYT notları, 9. sınıf ders notları, 
+              10. sınıf ders notları, 11. sınıf ders notları, 12. sınıf ders notları, 
+              ücretsiz ders notları, konu anlatımı, ders özeti, sınav hazırlık
             </p>
           </div>
 
@@ -661,7 +724,8 @@ export default function HomePage() {
                             <img
                               src={note.imageUrl}
                               alt={note.title}
-                              className="w-full h-full object-cover"
+                              className="w-full h-full object-contain bg-gray-100"
+                              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                             />
                             {/* Overlay gradient */}
                             <div className={`absolute inset-0 bg-gradient-to-br ${lessonImage.gradient} opacity-60`}></div>
@@ -752,11 +816,15 @@ export default function HomePage() {
           )}
         </section>
 
-        {/* Features Section */}
-        <section className="mb-12">
+        {/* Features Section - SEO Optimized */}
+        <section className="mb-12" aria-labelledby="features-heading">
           <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Neden DersNotu.net?</h2>
-            <p className="text-gray-600">Öğrenciler için tasarlanmış modern özellikler</p>
+            <h2 id="features-heading" className="text-2xl font-bold text-gray-900 mb-2">
+              Neden DersNotu.net? - Türkiye'nin En İyi Ders Notu Platformu
+            </h2>
+            <p className="text-gray-600">
+              Lise öğrencileri ve YKS adayları için tasarlanmış ücretsiz ders notları
+            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -765,12 +833,12 @@ export default function HomePage() {
                 <div className="h-12 w-12 rounded-xl bg-blue-50 flex items-center justify-center mb-4">
                   <BookOpen className="h-6 w-6 text-[#3B82F6]" />
                 </div>
-                <CardTitle className="text-gray-900">Kapsamlı Arşiv</CardTitle>
+                <CardTitle className="text-gray-900">9-12. Sınıf Ders Notları</CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-gray-600">
-                  9. sınıftan TYT'ye kadar tüm derslerin notlarına tek yerden erişin. 
-                  Binlerce kaliteli ders notu seni bekliyor.
+                  9. sınıf, 10. sınıf, 11. sınıf ve 12. sınıf ders notları tek yerden. 
+                  TYT ve AYT hazırlık için binlerce kaliteli not seni bekliyor.
                 </CardDescription>
               </CardContent>
             </Card>
@@ -787,6 +855,11 @@ export default function HomePage() {
                   Not paylaştıkça puan kazan, seviye atla ve özel ödülleri kazanın. 
                   Toplulukta öne çık ve liderlik tablosunda yerini al.
                 </CardDescription>
+                <Link href="/leaderboard" className="inline-block mt-4">
+                  <Button variant="outline" size="sm" className="text-purple-600 border-purple-200 hover:bg-purple-50">
+                    Liderlik Tablosu →
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
 
@@ -840,5 +913,6 @@ export default function HomePage() {
       {/* Footer */}
       <Footer />
     </div>
+    </>
   );
 }

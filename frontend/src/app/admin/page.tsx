@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { notesApi, gradesApi, Grade } from '@/lib/api';
-import { Trash2, Edit, Check, X, Eye } from 'lucide-react';
+import { Trash2, Edit, Check, X, Eye, LogOut } from 'lucide-react';
 
 interface Note {
   id: string;
@@ -190,11 +190,25 @@ export default function AdminPage() {
               </Button>
               <h1 className="text-2xl font-bold text-gray-900">Admin Panel</h1>
             </div>
-            <div className="text-sm text-gray-600">
-              Toplam Notlar: {notes.length} | 
-              Bekleyen: {notes.filter(n => n.status === 'PENDING').length} |
-              Onaylanan: {notes.filter(n => n.status === 'APPROVED').length} |
-              Reddedilen: {notes.filter(n => n.status === 'REJECTED').length}
+            <div className="flex items-center space-x-4">
+              <div className="text-sm text-gray-600">
+                Toplam Notlar: {notes.length} | 
+                Bekleyen: {notes.filter(n => n.status === 'PENDING').length} |
+                Onaylanan: {notes.filter(n => n.status === 'APPROVED').length} |
+                Reddedilen: {notes.filter(n => n.status === 'REJECTED').length}
+              </div>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  localStorage.removeItem('token');
+                  localStorage.removeItem('userRole');
+                  router.push('/');
+                }}
+                className="text-red-600 border-red-600 hover:bg-red-50"
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Çıkış Yap
+              </Button>
             </div>
           </div>
         </div>
