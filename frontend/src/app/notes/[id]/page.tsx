@@ -335,7 +335,7 @@ export default function NoteDetailPage() {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="örnek@bikifi.com"
+                  placeholder="dersnotu@gmail.com"
                   value={commentEmail}
                   onChange={(e) => setCommentEmail(e.target.value)}
                   className="w-full"

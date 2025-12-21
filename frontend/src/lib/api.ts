@@ -1,5 +1,5 @@
 // API URL'ini direkt hardcode ediyoruz
-const API_BASE_URL = 'http://localhost:3002';
+const API_BASE_URL = 'http://localhost:3000';
 
 // Debug: API URL'ini kontrol et
 if (typeof window !== 'undefined') {
@@ -232,4 +232,55 @@ export interface Topic {
 
 export const gradesApi = {
   getAll: () => apiClient.get<Grade[]>('/grades'),
+};
+
+// XP/Leaderboard API
+export interface LeaderboardUser {
+  id: string;
+  username: string;
+  profileImage?: string;
+  totalPoints: number;
+  currentPoints: number;
+  periodPoints?: number;
+  _count?: {
+    notes: number;
+  };
+}
+
+export interface UserRank {
+  rank: number;
+  totalPoints: number;
+}
+
+export interface XPTransaction {
+  id: string;
+  amount: number;
+  type: string;
+  description?: string;
+  createdAt: string;
+}
+
+export interface XPResult {
+  user: {
+    id: string;
+    username: string;
+    currentPoints: number;
+    totalPoints: number;
+  };
+  xpAdded: number;
+  type: string;
+}
+
+export const xpApi = {
+  getLeaderboard: (limit: number = 100, period: 'all' | 'monthly' | 'yearly' = 'all') =>
+    apiClient.get<LeaderboardUser[]>(`/xp/leaderboard?limit=${limit}&period=${period}`),
+  
+  getUserRank: () =>
+    apiClient.get<UserRank>('/xp/rank'),
+  
+  getXPHistory: (limit: number = 20) =>
+    apiClient.get<XPTransaction[]>(`/xp/history?limit=${limit}`),
+  
+  addSessionXP: () =>
+    apiClient.post<XPResult>('/xp/session'),
 };

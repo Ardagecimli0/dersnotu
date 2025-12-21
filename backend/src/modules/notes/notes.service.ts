@@ -3,6 +3,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { CreateNoteDto } from './dto/create-note.dto';
 import { PrismaService } from '../../providers/prisma.service';
 import defaultSlugify from 'slugify';
+import { XP_REWARDS } from '../xp/xp.service';
 
 @Injectable()
 export class NotesService {
@@ -62,8 +63,8 @@ export class NotesService {
       },
     });
 
-    // 4. Kullanıcıya XP ekle (Not yükleme için +10 XP)
-    const uploadPoints = 10;
+    // 4. Kullanıcıya XP ekle (Not yükleme için +30 XP)
+    const uploadPoints = XP_REWARDS.NOTE_UPLOAD;
     await this.prisma.user.update({
       where: { id: userId },
       data: {
@@ -77,7 +78,7 @@ export class NotesService {
       data: {
         userId,
         amount: uploadPoints,
-        type: 'EARN_UPLOAD',
+        type: 'EARN_NOTE_UPLOAD',
         description: `Not yükleme: ${createNoteDto.title}`,
       },
     });
@@ -191,8 +192,8 @@ export class NotesService {
         data: { status: 'APPROVED' },
       });
 
-      // 3. Kullanıcıya Puan Ver (+10 Puan)
-      const POINTS_REWARD = 10;
+      // 3. Kullanıcıya Puan Ver (+1000 XP - Not onaylanması)
+      const POINTS_REWARD = XP_REWARDS.NOTE_APPROVED;
       await tx.user.update({
         where: { id: note.uploaderId },
         data: {
@@ -206,7 +207,7 @@ export class NotesService {
         data: {
           userId: note.uploaderId,
           amount: POINTS_REWARD,
-          type: 'EARN_UPLOAD', // Schema'da tanımladığımız Enum
+          type: 'EARN_NOTE_APPROVED',
           description: `Not Onayı: ${note.title}`,
         },
       });

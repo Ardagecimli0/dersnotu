@@ -1,24 +1,10 @@
-import type { Metadata } from "next";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
-
-export const metadata: Metadata = {
-  title: "KVKK ve Kişisel Verilerin Korunması",
-  description: "DersNotu.net Kişisel Verilerin Korunması Kanunu (KVKK) Aydınlatma Metni",
-};
+import { Footer } from "@/components/footer";
+import { SiteHeader } from "@/components/site-header";
 
 export default function KVKKPage() {
   return (
     <div className="min-h-screen bg-[#F9FAFB]">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <Link href="/" className="inline-flex items-center text-gray-600 hover:text-gray-900">
-            <ArrowLeft className="h-5 w-5 mr-2" />
-            Ana Sayfaya Dön
-          </Link>
-        </div>
-      </header>
+      <SiteHeader />
 
       {/* Content */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -142,6 +128,7 @@ export default function KVKKPage() {
           </div>
         </div>
       </main>
+      <Footer />
     </div>
   );
 }

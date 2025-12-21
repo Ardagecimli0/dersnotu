@@ -6,15 +6,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { usersApi, UserProfile, Note } from '@/lib/api';
+import { usersApi, UserProfile, Note, xpApi, UserRank } from '@/lib/api';
 import { Footer } from '@/components/footer';
-import { User, Edit2, Upload, Trophy, FileText, Eye, Heart, Calendar, BookOpen, GraduationCap } from 'lucide-react';
+import { User, Edit2, Upload, Trophy, FileText, Eye, Heart, Calendar, BookOpen, GraduationCap, Search } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ChevronDown, LogOut, Shield } from 'lucide-react';
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [userNotes, setUserNotes] = useState<Note[]>([]);
+  const [userRank, setUserRank] = useState<UserRank | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -63,6 +65,14 @@ export default function ProfilePage() {
         // Fetch user notes
         const notesData = await usersApi.getUserNotes();
         setUserNotes(notesData as Note[]);
+
+        // Fetch user rank
+        try {
+          const rankData = await xpApi.getUserRank();
+          setUserRank(rankData);
+        } catch (e) {
+          console.error('Sıralama alınamadı:', e);
+        }
         
         setEditForm({
           username: profileData.username,
@@ -164,39 +174,68 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-200">
+    <div className="min-h-screen bg-[#F9FAFB]">
+      {/* Glassmorphism Navbar - Homepage ile aynı */}
+      <header className="sticky top-0 z-50 backdrop-blur-md bg-white/80 border-b border-gray-200/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <Link href="/" className="flex items-center space-x-2">
-              <BookOpen className="h-8 w-8 text-[#3B82F6]" />
-              <span className="text-xl font-bold text-gray-900">DersNotu</span>
-            </Link>
+          <div className="flex items-center justify-between h-20">
+            {/* Logo - Center */}
+            <div className="flex-1 flex justify-center">
+              <Link href="/" className="flex items-center space-x-3">
+                <Image 
+                  src="/logo1.png" 
+                  alt="DersNotu.net" 
+                  width={130} 
+                  height={130}
+                  className="object-contain"
+                />
+              </Link>
+            </div>
+
+            {/* Auth Buttons / User Menu - Right */}
             <div className="flex-1 flex justify-end items-center space-x-4 ml-4">
               {userRole ? (
                 <div className="relative" ref={userMenuRef}>
-                  <Button
-                    variant="ghost"
-                    className="text-gray-700 hover:text-[#3B82F6] flex items-center gap-2"
+                  <button
                     onClick={() => setShowUserMenu(!showUserMenu)}
+                    className="flex items-center gap-2 p-2 rounded-full hover:bg-gray-100 transition-colors"
                   >
-                    <User className="h-5 w-5" />
-                    <span>{userName}</span>
-                    <ChevronDown className={`h-4 w-4 transition-transform ${showUserMenu ? 'rotate-180' : ''}`} />
-                  </Button>
+                    <div className="h-8 w-8 rounded-full bg-[#3B82F6] flex items-center justify-center text-white font-semibold text-sm">
+                      {userName.charAt(0).toUpperCase()}
+                    </div>
+                  </button>
                   {showUserMenu && (
                     <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
-                      <Link href="/dashboard" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                      <Link 
+                        href="/dashboard" 
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                        onClick={() => setShowUserMenu(false)}
+                      >
                         <FileText className="h-4 w-4" />
                         Not Yükle
                       </Link>
-                      <Link href="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                      <Link 
+                        href="/profile" 
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                        onClick={() => setShowUserMenu(false)}
+                      >
                         <User className="h-4 w-4" />
                         Profil
                       </Link>
+                      <Link 
+                        href="/leaderboard" 
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                        onClick={() => setShowUserMenu(false)}
+                      >
+                        <Trophy className="h-4 w-4" />
+                        Liderlik Tablosu
+                      </Link>
                       {userRole === 'ADMIN' && (
-                        <Link href="/admin" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                        <Link 
+                          href="/admin" 
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+                          onClick={() => setShowUserMenu(false)}
+                        >
                           <Shield className="h-4 w-4" />
                           Admin Panel
                         </Link>
@@ -338,16 +377,26 @@ export default function ProfilePage() {
                     <span>{getLevel(profile.totalPoints) * 100} XP</span>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+                <div className="grid grid-cols-3 gap-4 pt-4 border-t">
                   <div>
                     <p className="text-sm text-gray-500">Toplam XP</p>
-                    <p className="text-2xl font-bold text-[#3B82F6]">{profile.totalPoints}</p>
+                    <p className="text-2xl font-bold text-[#3B82F6]">{profile.totalPoints.toLocaleString()}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Kullanılabilir Puan</p>
-                    <p className="text-2xl font-bold text-green-600">{profile.currentPoints}</p>
+                    <p className="text-sm text-gray-500">Kullanılabilir</p>
+                    <p className="text-2xl font-bold text-green-600">{profile.currentPoints.toLocaleString()}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Sıralama</p>
+                    <p className="text-2xl font-bold text-yellow-600">#{userRank?.rank || '-'}</p>
                   </div>
                 </div>
+                <Link href="/leaderboard" className="block mt-4">
+                  <Button variant="outline" className="w-full">
+                    <Trophy className="h-4 w-4 mr-2" />
+                    Liderlik Tablosunu Gör
+                  </Button>
+                </Link>
               </div>
             </CardContent>
           </Card>
