@@ -460,7 +460,7 @@ export default function ProfilePage() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {userNotes.map((note) => (
-                  <Link key={note.id} href={`/notes/${note.id}`}>
+                  <Link key={note.id} href={`/konu/${note.slug}`}>
                     <Card className="hover:shadow-lg transition-shadow cursor-pointer h-full">
                       <CardHeader>
                         <div className="flex items-start justify-between">

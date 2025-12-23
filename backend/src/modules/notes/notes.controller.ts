@@ -37,7 +37,13 @@ export class NotesController {
     return this.notesService.findAll(lesson, grade);
   }
 
-  // 🔓 3. NOT DETAYI (Herkes görebilir)
+  // 🔓 3. NOT DETAYI - SLUG İLE (Herkes görebilir)
+  @Get('slug/:slug')
+  findBySlug(@Param('slug') slug: string) {
+    return this.notesService.findBySlug(slug);
+  }
+
+  // 🔓 4. NOT DETAYI - ID İLE (Herkes görebilir)
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.notesService.findOne(id);
