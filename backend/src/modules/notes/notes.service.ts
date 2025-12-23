@@ -135,7 +135,49 @@ export class NotesService {
     });
   }
 
-  // Tek bir notu getir
+  // Slug ile not getir
+  async findBySlug(slug: string) {
+    const note = await this.prisma.note.findUnique({
+      where: { slug },
+      include: {
+        uploader: { select: { username: true } },
+        topic: {
+          select: {
+            name: true,
+            lesson: {
+              select: {
+                name: true,
+                slug: true,
+                grade: {
+                  select: {
+                    name: true,
+                    slug: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!note) {
+      throw new BadRequestException('Not bulunamadı');
+    }
+
+    // Görüntülenme sayısını artır
+    await this.prisma.note.update({
+      where: { slug },
+      data: { viewCount: { increment: 1 } },
+    });
+
+    return {
+      ...note,
+      viewCount: note.viewCount + 1,
+    };
+  }
+
+  // Tek bir notu getir (ID ile)
   async findOne(noteId: string) {
     const note = await this.prisma.note.findUnique({
       where: { id: noteId },

@@ -715,7 +715,7 @@ export default function HomePage() {
                   note.topic?.name || ''
                 );
                 return (
-                  <Link key={note.id} href={`/notes/${note.id}`}>
+                  <Link key={note.id} href={`/konu/${note.slug}`}>
                     <Card className="border-0 shadow-sm bg-white rounded-2xl hover:shadow-lg transition-all duration-200 group cursor-pointer overflow-hidden transform hover:scale-[1.02]">
                       {/* Görsel Header - Gradient Background */}
                       <div className={`relative h-48 overflow-hidden bg-gradient-to-br ${lessonImage.gradient} ${note.imageUrl ? '' : ''}`}>

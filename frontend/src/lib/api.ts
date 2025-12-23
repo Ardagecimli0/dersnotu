@@ -1,5 +1,5 @@
 // API URL'ini direkt hardcode ediyoruz
-const API_BASE_URL = 'http://localhost:3000';
+const API_BASE_URL = 'http://localhost:3002';
 
 // Debug: API URL'ini kontrol et
 if (typeof window !== 'undefined') {
@@ -119,6 +119,7 @@ export const apiClient = new ApiClient();
 export interface Note {
   id: string;
   title: string;
+  slug: string;
   content?: string;
   fileUrl?: string;
   imageUrl?: string; // fileUrl için alias
@@ -163,6 +164,9 @@ export const notesApi = {
   
   getById: (id: string) =>
     apiClient.get<Note>(`/notes/${id}`),
+  
+  getBySlug: (slug: string) =>
+    apiClient.get<Note>(`/notes/slug/${slug}`),
   
   getAllForAdmin: () =>
     apiClient.get<Note[]>('/notes/admin/all'),
