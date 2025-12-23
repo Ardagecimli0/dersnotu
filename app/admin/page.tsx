@@ -5,39 +5,21 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { notesApi, gradesApi, Grade } from '@/lib/api';
+import { notesApi, gradesApi, Grade, type Note as ApiNote } from '@/lib/api';
 import { Trash2, Edit, Check, X, Eye, LogOut } from 'lucide-react';
 
-interface Note {
-  id: string;
-  title: string;
-  content?: string;
-  fileUrl?: string;
-  status: string;
+type AdminNote = ApiNote & {
   rejectionReason?: string;
-  viewCount: number;
-  likeCount: number;
-  createdAt: string;
-  uploader: {
-    username: string;
-    email: string;
+  uploader: ApiNote['uploader'] & {
+    email?: string;
   };
-  topic: {
-    name: string;
-    lesson: {
-      name: string;
-      grade: {
-        name: string;
-      };
-    };
-  };
-}
+};
 
 export default function AdminPage() {
-  const [notes, setNotes] = useState<Note[]>([]);
+  const [notes, setNotes] = useState<AdminNote[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState<'ALL' | 'PENDING' | 'APPROVED' | 'REJECTED'>('ALL');
-  const [editingNote, setEditingNote] = useState<Note | null>(null);
+  const [editingNote, setEditingNote] = useState<AdminNote | null>(null);
   const [editForm, setEditForm] = useState({ title: '', content: '', fileUrl: '' });
   const [grades, setGrades] = useState<Grade[]>([]);
   const router = useRouter();
@@ -67,7 +49,7 @@ export default function AdminPage() {
           notesApi.getAllForAdmin(),
           gradesApi.getAll(),
         ]);
-        setNotes(fetchedNotes as Note[]);
+        setNotes(fetchedNotes as AdminNote[]);
         setGrades(fetchedGrades);
       } catch (error) {
         console.error('Veriler yüklenemedi:', error);
@@ -120,7 +102,7 @@ export default function AdminPage() {
     }
   };
 
-  const handleEdit = (note: Note) => {
+  const handleEdit = (note: AdminNote) => {
     setEditingNote(note);
     setEditForm({
       title: note.title,
