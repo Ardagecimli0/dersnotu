@@ -9,7 +9,7 @@
     "start": "concurrently -n \"backend,frontend\" -c \"cyan,magenta\" \"BACKEND_PORT=3001 node backend/dist/main\" \"next start\"",
     "start:backend": "node backend/dist/main",
     "start:frontend": "next start",
-    "heroku-postbuild": "cd backend && npm install && npx prisma generate && npm run build && npx prisma migrate deploy && cd .. && npm run build",
+    "heroku-postbuild": "cd backend && npm install --production=false && npx prisma generate && npm run build && npx prisma migrate deploy && cd .. && npm run build",
     "lint": "eslint"
   },
   "dependencies": {
