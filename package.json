@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "heroku-postbuild": "npx prisma generate && npm run build",
+    "heroku-postbuild": "npx prisma generate --schema=./backend/prisma/schema.prisma && npm run build",
     "lint": "eslint"
   },
   "dependencies": {
@@ -35,3 +35,9 @@
     "typescript": "^5"
   }
 }
+
+
+
+
+
+
