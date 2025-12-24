@@ -1,7 +1,8 @@
 // API URL'ini environment variable'dan al, yoksa default değerleri kullan
+// Production'da Next.js rewrites kullanıldığı için relative path kullanıyoruz
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || (
   process.env.NODE_ENV === 'production' 
-    ? 'https://www.dersnotu.net' 
+    ? '' // Production'da rewrites kullanıldığı için boş string (relative path)
     : 'http://localhost:3002'
 );
 
