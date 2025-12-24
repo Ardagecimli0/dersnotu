@@ -6,9 +6,7 @@ generator client {
 }
 datasource db {
   provider = "mysql"
-  url      = process.env.NODE_ENV === 'production' 
-    ? env("DATABASE_URL")
-    : "mysql://root:1234@localhost:3306/dersnotu_db"
+  url      = env("DATABASE_URL")
 }
 
 // --------------------------------------
