@@ -1,0 +1,38 @@
+{
+  "name": "dersnotu",
+  "description": "DersNotu.net - Ücretsiz Lise Ders Notları Platformu",
+  "repository": "https://github.com/yourusername/dersnotu",
+  "keywords": ["nextjs", "nestjs", "mysql", "prisma"],
+  "env": {
+    "DATABASE_URL": {
+      "description": "MySQL database connection string",
+      "required": true
+    },
+    "JWT_SECRET": {
+      "description": "Secret key for JWT token encryption (optional, defaults to 'GIZLI_KELIME')",
+      "required": false
+    },
+    "NEXT_PUBLIC_API_URL": {
+      "description": "Public API URL for frontend (e.g., https://www.dersnotu.net)",
+      "value": "https://www.dersnotu.net",
+      "required": false
+    },
+    "BACKEND_PORT": {
+      "description": "Internal port for backend API (default: 3001)",
+      "value": "3001",
+      "required": false
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "basic"
+    }
+  },
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ]
+}
+

@@ -9,7 +9,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(), // Token'ı "Authorization: Bearer <token>" başlığından oku
       ignoreExpiration: false, // Süresi dolmuş tokenları reddet
-      secretOrKey: 'GIZLI_KELIME', // GERÇEK HAYATTA BU .ENV DOSYASINDAN GELMELİ! (process.env.JWT_SECRET)
+      secretOrKey: process.env.JWT_SECRET || 'GIZLI_KELIME', // Environment variable'dan al, yoksa default kullan
     });
   }
 
