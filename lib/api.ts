@@ -1,7 +1,9 @@
-// API URL'ini direkt hardcode ediyoruz (Heroku için)
-const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://ders-notu-app.herokuapp.com' 
-  : 'http://localhost:3002';
+// API URL'ini environment variable'dan al, yoksa default değerleri kullan
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || (
+  process.env.NODE_ENV === 'production' 
+    ? 'https://www.dersnotu.net' 
+    : 'http://localhost:3002'
+);
 
 // Debug: API URL'ini kontrol et
 if (typeof window !== 'undefined') {

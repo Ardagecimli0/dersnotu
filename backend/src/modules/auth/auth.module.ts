@@ -10,7 +10,7 @@ import { JwtStrategy } from './jwt.strategy';
   imports: [
     PassportModule,
     JwtModule.register({
-      secret: 'GIZLI_KELIME', // .env'den gelmeli
+      secret: process.env.JWT_SECRET || 'GIZLI_KELIME', // Environment variable'dan al, yoksa default kullan
       signOptions: { expiresIn: '1d' }, // Token 1 gün geçerli
     }),
   ],

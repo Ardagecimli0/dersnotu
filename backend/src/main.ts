@@ -14,6 +14,9 @@ async function bootstrap() {
   
   app.useGlobalPipes(new ValidationPipe());
   
-  await app.listen(process.env.PORT ?? 3002);
+  // Heroku'da backend internal port'ta çalışır, frontend Heroku'nun PORT'unu kullanır
+  const backendPort = process.env.BACKEND_PORT || process.env.PORT || 3002;
+  await app.listen(backendPort);
+  console.log(`Backend listening on port ${backendPort}`);
 }
 void bootstrap();
