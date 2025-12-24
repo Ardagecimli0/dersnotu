@@ -5,17 +5,41 @@ const nextConfig: NextConfig = {
     root: __dirname,
   },
   async rewrites() {
-    // Development'ta localhost:3002'ye proxy yap
-    if (process.env.NODE_ENV === 'development') {
-      return [
-        {
-          source: '/api/:path*',
-          destination: 'http://localhost:3002/:path*',
-        },
-      ];
-    }
-    // Production'da rewrites yok, frontend NEXT_PUBLIC_API_URL kullanacak
-    return [];
+    const backendUrl = process.env.NODE_ENV === 'development' 
+      ? 'http://localhost:3002'
+      : 'http://localhost:3001'; // Heroku'da backend 3001 port'unda çalışıyor
+    
+    return [
+      // Backend API route'larını backend'e proxy et
+      {
+        source: '/auth/:path*',
+        destination: `${backendUrl}/auth/:path*`,
+      },
+      {
+        source: '/notes',
+        destination: `${backendUrl}/notes`,
+      },
+      {
+        source: '/notes/:path*',
+        destination: `${backendUrl}/notes/:path*`,
+      },
+      {
+        source: '/users/:path*',
+        destination: `${backendUrl}/users/:path*`,
+      },
+      {
+        source: '/grades',
+        destination: `${backendUrl}/grades`,
+      },
+      {
+        source: '/grades/:path*',
+        destination: `${backendUrl}/grades/:path*`,
+      },
+      {
+        source: '/xp/:path*',
+        destination: `${backendUrl}/xp/:path*`,
+      },
+    ];
   },
 };
 
