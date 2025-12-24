@@ -5,8 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
-    "heroku-postbuild": "npx prisma generate --schema=./backend/prisma/schema.prisma && npm run build",
+    "start": "node backend/dist/main & next start",
+    "heroku-postbuild": "cd backend && npm install && npx prisma generate && cd .. && npm run build",
     "lint": "eslint"
   },
   "dependencies": {
