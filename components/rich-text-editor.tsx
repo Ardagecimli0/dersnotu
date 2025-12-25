@@ -4,8 +4,7 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link';
-import TextStyle from '@tiptap/extension-text-style';
-import Color from '@tiptap/extension-color';
+import { TextStyle } from '@tiptap/extension-text-style';import Color from '@tiptap/extension-color';
 import TextAlign from '@tiptap/extension-text-align';
 import { useCallback, useEffect } from 'react';
 import { 
@@ -101,7 +100,7 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
   // Update editor content when value prop changes
   useEffect(() => {
     if (editor && value !== editor.getHTML()) {
-      editor.commands.setContent(value, false);
+      editor.commands.setContent(value, { parseOptions: { preserveWhitespace: true } });
     }
   }, [value, editor]);
 
