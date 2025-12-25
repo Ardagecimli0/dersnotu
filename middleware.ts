@@ -13,20 +13,31 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Yönlendirme mantığı: Sadece www olmayan dersnotu.net trafiğini www'ye yönlendir
-  // Yönlendirme döngüsünü önlemek için www.dersnotu.net veya localhost için yönlendirme yapma
-  const isNonWwwDomain = 
-    hostname === 'dersnotu.net' ||
-    hostname.startsWith('dersnotu.net:');
+  /// 1. Önce ads.txt kontrolü (Yönlendirmeden bağımsız olarak dosyayı sun)
+if (pathname === '/ads.txt') {
+  return NextResponse.json('google.com, pub-2222061433846943, DIRECT, f08c47fec0942fa0', {
+    headers: {
+      'Content-Type': 'text/plain',
+    },
+  });
+}
 
-  // Development ortamı (localhost) veya zaten www domain ise yönlendirme yapma
-  const shouldSkipRedirect = 
-    hostname === 'www.dersnotu.net' ||
-    hostname.startsWith('www.dersnotu.net:') ||
-    hostname === 'localhost' ||
-    hostname.startsWith('localhost:') ||
-    hostname.includes('127.0.0.1');
+// 2. Yönlendirme mantığı
+const isNonWwwDomain = 
+  hostname === 'dersnotu.net' ||
+  hostname.startsWith('dersnotu.net:');
 
+const shouldSkipRedirect = 
+  hostname === 'www.dersnotu.net' ||
+  hostname.startsWith('www.dersnotu.net:') ||
+  hostname === 'localhost' ||
+  hostname.startsWith('localhost:') ||
+  hostname.includes('127.0.0.1');
+
+// Eğer non-www ise ve skip edilmemeliyse yönlendir
+if (isNonWwwDomain && !shouldSkipRedirect) {
+  return NextResponse.redirect(`https://www.dersnotu.net${request.nextUrl.pathname}`, 301);
+}
   // Sadece non-www domain için yönlendirme yap (döngüyü önle)
   if (isNonWwwDomain && !shouldSkipRedirect) {
     const url = request.nextUrl.clone();
