@@ -4,9 +4,11 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { notesApi, gradesApi, Grade, type Note as ApiNote } from '@/lib/api';
 import { Trash2, Edit, Check, X, Eye, LogOut } from 'lucide-react';
+import { RichTextEditor } from '@/components/rich-text-editor';
 
 type AdminNote = ApiNote & {
   rejectionReason?: string;
@@ -246,12 +248,15 @@ export default function AdminPage() {
                         value={editForm.title}
                         onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
                       />
-                      <textarea
-                        placeholder="İçerik"
-                        value={editForm.content}
-                        onChange={(e) => setEditForm({ ...editForm, content: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3B82F6] resize-y min-h-[100px]"
-                      />
+                      <div className="space-y-2">
+                        <Label htmlFor="edit-content">İçerik</Label>
+                        <RichTextEditor
+                          value={editForm.content}
+                          onChange={(value) => setEditForm({ ...editForm, content: value })}
+                          placeholder="Not içeriğini düzenleyin..."
+                          className="bg-white"
+                        />
+                      </div>
                       <Input
                         placeholder="Dosya URL (opsiyonel)"
                         value={editForm.fileUrl}
@@ -301,8 +306,11 @@ export default function AdminPage() {
 
                       {note.content && (
                         <div className="bg-gray-50 p-4 rounded-md mb-4">
-                          <h4 className="font-medium text-sm text-gray-700 mb-2">Açıklama:</h4>
-                          <p className="text-gray-600">{note.content}</p>
+                          <h4 className="font-medium text-sm text-gray-700 mb-2">İçerik:</h4>
+                          <div 
+                            className="text-gray-600 prose prose-sm max-w-none"
+                            dangerouslySetInnerHTML={{ __html: note.content }}
+                          />
                         </div>
                       )}
 

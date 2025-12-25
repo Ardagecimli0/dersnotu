@@ -258,11 +258,10 @@ export default function NoteDetailPage() {
 
             {/* Content */}
             {note.content && (
-              <div className="prose max-w-none mb-6">
-                <p className="text-gray-700 text-lg leading-relaxed whitespace-pre-wrap">
-                  {note.content}
-                </p>
-              </div>
+              <div 
+                className="prose max-w-none mb-6 note-content"
+                dangerouslySetInnerHTML={{ __html: note.content }}
+              />
             )}
 
             {/* Stats */}

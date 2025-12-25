@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { notesApi, usersApi, gradesApi } from '@/lib/api';
 import { ChevronDown, Upload, Image as ImageIcon, User, LogOut, FileText } from 'lucide-react';
 import { Footer } from '@/components/footer';
+import { RichTextEditor } from '@/components/rich-text-editor';
 
 interface Note {
   id: string;
@@ -382,13 +383,15 @@ export default function DashboardPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="content">Açıklama (opsiyonel)</Label>
-                    <textarea
-                      id="content"
+                    <Label htmlFor="content">Not İçeriği (opsiyonel)</Label>
+                    <p className="text-xs text-gray-500 mb-2">
+                      Başlık boyutları, görseller, listeler ve daha fazlasını ekleyebilirsiniz
+                    </p>
+                    <RichTextEditor
                       value={content}
-                      onChange={(e) => setContent(e.target.value)}
-                      placeholder="Not açıklaması..."
-                      className="w-full p-2 border border-gray-300 rounded-md resize-none h-24"
+                      onChange={setContent}
+                      placeholder="Not içeriğinizi buraya yazın..."
+                      className="bg-white"
                     />
                   </div>
                   <Button type="submit" className="w-full" disabled={isUploading}>
