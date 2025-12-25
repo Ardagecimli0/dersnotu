@@ -52,11 +52,16 @@ export class NotesService {
     const finalSlug = `${rawSlug}-${uniqueSuffix}`;
 
     // 3. Veritabanına Kayıt
+    // fileUrl boş string ise undefined yap (null olarak kaydedilir)
+    const fileUrl = createNoteDto.fileUrl && createNoteDto.fileUrl.trim() !== '' 
+      ? createNoteDto.fileUrl 
+      : undefined;
+
     const newNote = await this.prisma.note.create({
       data: {
         title: createNoteDto.title,
         content: createNoteDto.content || '',
-        fileUrl: createNoteDto.fileUrl,
+        fileUrl: fileUrl,
         topicId: topicId,
         uploaderId: userId,
         slug: finalSlug,
