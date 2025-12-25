@@ -60,12 +60,12 @@ model Topic {
 
 model Note {
   id              String   @id @default(uuid())
-  title           String
-  content         String?
+  title           String   @db.Text
+  content         String?  @db.Text
   fileUrl         String?
   slug            String   @unique
   status          String   @default("PENDING")
-  rejectionReason String?
+  rejectionReason String?  @db.Text
   viewCount       Int      @default(0)
   likeCount       Int      @default(0)
   uploaderId      String
