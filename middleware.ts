@@ -5,20 +5,30 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const hostname = request.headers.get('host') || '';
 
-  // /ads.txt isteği için yönlendirme yapma - dosyayı doğrudan servis et
-  // Next.js public klasöründeki dosyalar otomatik olarak servis edilir,
-  // ancak middleware'de açıkça belirtmek için kontrol ediyoruz
+  // EN ÖNEMLİ: /ads.txt isteği için yönlendirme yapma - dosyayı doğrudan servis et
+  // Bu kontrol EN BAŞTA olmalı, yönlendirme mantığından ÖNCE
+  // Next.js public klasöründeki dosyalar otomatik olarak servis edilir
   if (pathname === '/ads.txt') {
+    // Yönlendirme yapmadan dosyayı doğrudan servis et
     return NextResponse.next();
   }
 
-  // www olmayan dersnotu.net trafiğini www'ye yönlendir
-  // Production ortamında hostname kontrolü (port numaralarını da kontrol et)
+  // Yönlendirme mantığı: Sadece www olmayan dersnotu.net trafiğini www'ye yönlendir
+  // Yönlendirme döngüsünü önlemek için www.dersnotu.net veya localhost için yönlendirme yapma
   const isNonWwwDomain = 
     hostname === 'dersnotu.net' ||
     hostname.startsWith('dersnotu.net:');
 
-  if (isNonWwwDomain) {
+  // Development ortamı (localhost) veya zaten www domain ise yönlendirme yapma
+  const shouldSkipRedirect = 
+    hostname === 'www.dersnotu.net' ||
+    hostname.startsWith('www.dersnotu.net:') ||
+    hostname === 'localhost' ||
+    hostname.startsWith('localhost:') ||
+    hostname.includes('127.0.0.1');
+
+  // Sadece non-www domain için yönlendirme yap (döngüyü önle)
+  if (isNonWwwDomain && !shouldSkipRedirect) {
     const url = request.nextUrl.clone();
     url.hostname = 'www.dersnotu.net';
     url.protocol = 'https:';
@@ -29,6 +39,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(url, 301);
   }
 
+  // Diğer tüm istekler için normal akışa devam et
   return NextResponse.next();
 }
 
