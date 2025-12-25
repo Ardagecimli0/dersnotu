@@ -38,12 +38,16 @@ heroku config:set BACKEND_PORT=3001
 
 # Frontend API URL (Domain veya Heroku app URL'iniz)
 heroku config:set NEXT_PUBLIC_API_URL="https://www.dersnotu.net"
+
+# NPM Legacy Peer Deps (React Quill için gerekli - React 19 uyumluluğu)
+heroku config:set npm_config_legacy_peer_deps=true
 ```
 
 **ÖNEMLİ:** 
 - `DATABASE_URL` içindeki port 3306 olmalıdır ve `?sslmode=disable` parametresi eklenmelidir
 - `NEXT_PUBLIC_API_URL` domain'iniz ile eşleşmeli (www.dersnotu.net)
 - `JWT_SECRET` opsiyoneldir, belirtilmezse default değer kullanılır
+- `npm_config_legacy_peer_deps=true` React Quill'in React 19 ile çalışması için gereklidir
 
 ### 4. Custom Domain Ayarlayın (Opsiyonel)
 
