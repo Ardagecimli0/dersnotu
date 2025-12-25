@@ -139,3 +139,112 @@
 .animate-slide-in-right {
   animation: slide-in-right 0.3s ease-out;
 }
+
+/* Rich Text Editor Content Styles */
+.note-content {
+  @apply text-gray-700 leading-relaxed;
+}
+
+.note-content h1,
+.note-content h2,
+.note-content h3,
+.note-content h4,
+.note-content h5,
+.note-content h6 {
+  @apply font-bold mt-6 mb-4 text-gray-900;
+}
+
+.note-content h1 {
+  @apply text-3xl;
+}
+
+.note-content h2 {
+  @apply text-2xl;
+}
+
+.note-content h3 {
+  @apply text-xl;
+}
+
+.note-content h4 {
+  @apply text-lg;
+}
+
+.note-content p {
+  @apply mb-4;
+}
+
+.note-content ul,
+.note-content ol {
+  @apply mb-4 ml-6;
+}
+
+.note-content ul {
+  @apply list-disc;
+}
+
+.note-content ol {
+  @apply list-decimal;
+}
+
+.note-content li {
+  @apply mb-2;
+}
+
+.note-content img {
+  @apply max-w-full h-auto rounded-lg my-4;
+}
+
+.note-content blockquote {
+  @apply border-l-4 border-gray-300 pl-4 italic my-4 text-gray-600;
+}
+
+.note-content a {
+  @apply text-blue-600 hover:underline;
+}
+
+.note-content strong {
+  @apply font-bold;
+}
+
+.note-content em {
+  @apply italic;
+}
+
+.note-content code {
+  @apply bg-gray-100 px-2 py-1 rounded text-sm font-mono;
+}
+
+.note-content pre {
+  @apply bg-gray-100 p-4 rounded-lg overflow-x-auto my-4;
+}
+
+.note-content pre code {
+  @apply bg-transparent p-0;
+}
+
+/* Rich Text Editor Styles */
+.rich-text-editor .ql-container {
+  min-height: 200px;
+  font-size: 16px;
+}
+
+.rich-text-editor .ql-editor {
+  min-height: 200px;
+}
+
+.rich-text-editor .ql-editor.ql-blank::before {
+  color: #9ca3af;
+  font-style: normal;
+}
+
+.rich-text-editor .ql-toolbar {
+  border-top-left-radius: 0.375rem;
+  border-top-right-radius: 0.375rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.rich-text-editor .ql-container {
+  border-bottom-left-radius: 0.375rem;
+  border-bottom-right-radius: 0.375rem;
+}
