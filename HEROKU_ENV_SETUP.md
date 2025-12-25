@@ -40,13 +40,6 @@ Backend API'nin internal port'u. Varsayılan: `3001`
 heroku config:set BACKEND_PORT=3001
 ```
 
-### npm_config_legacy_peer_deps
-NPM peer dependency çakışmalarını çözmek için. React Quill'in React 19 ile çalışması için gereklidir.
-
-```bash
-heroku config:set npm_config_legacy_peer_deps=true
-```
-
 ## Tüm Environment Variables'ları Görüntüleme
 
 ```bash
@@ -76,10 +69,6 @@ heroku config:set DATABASE_URL="mysql://abguzell_dersnotuadmin:ardazay123@104.24
 heroku config:set NEXT_PUBLIC_API_URL="https://www.dersnotu.net"
 heroku config:set JWT_SECRET="your-super-secret-jwt-key-here"
 heroku config:set BACKEND_PORT=3001
-
-# React Quill için gerekli (React 19 uyumluluğu)
-heroku config:set npm_config_legacy_peer_deps=true
-```
 
 ## Önemli Notlar
 
