@@ -89,5 +89,21 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: lesson.priority,
   }));
 
-  return [...staticPages, ...gradePages, ...lessonPages];
+  // Kombinasyon sayfaları (Sınıf + Ders) - SEO için önemli
+  const combinationPages: { url: string; lastModified: Date; changeFrequency: 'daily'; priority: number }[] = [];
+  const grades = ['9-sinif', '10-sinif', '11-sinif', '12-sinif'];
+  const lessons = ['matematik', 'fizik', 'kimya', 'biyoloji', 'turkce', 'tarih', 'cografya'];
+  
+  grades.forEach(grade => {
+    lessons.forEach(lesson => {
+      combinationPages.push({
+        url: `${baseUrl}/ders-notlari/${grade}-${lesson}-ders-notlari`,
+        lastModified: new Date(),
+        changeFrequency: 'daily' as const,
+        priority: 0.95,
+      });
+    });
+  });
+
+  return [...staticPages, ...gradePages, ...lessonPages, ...combinationPages];
 }

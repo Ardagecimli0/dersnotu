@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
@@ -243,8 +243,68 @@ const getLessonImage = (lessonName: string, topicName?: string) => {
   };
 };
 
+// URL'den slug parse etme fonksiyonu
+const parseSlugFromUrl = (pathname: string) => {
+  if (pathname.startsWith('/ders-notlari/')) {
+    const slug = pathname.replace('/ders-notlari/', '');
+    
+    // Kombinasyon URL'leri: 10-sinif-biyoloji-ders-notlari
+    // Önce kombinasyon kontrolü yap (daha spesifik)
+    const combinationPattern = /^(\d+)-sinif-(.+)-ders-notlari$/;
+    const match = slug.match(combinationPattern);
+    
+    if (match) {
+      return {
+        grade: `${match[1]}-sinif`,
+        lesson: match[2],
+      };
+    }
+    
+    // TYT/AYT kombinasyonları: tyt-matematik-ders-notlari
+    if (slug.startsWith('tyt-') && slug.endsWith('-ders-notlari')) {
+      const lesson = slug.replace('tyt-', '').replace('-ders-notlari', '');
+      return { grade: 'tyt', lesson };
+    }
+    if (slug.startsWith('ayt-') && slug.endsWith('-ders-notlari')) {
+      const lesson = slug.replace('ayt-', '').replace('-ders-notlari', '');
+      return { grade: 'ayt', lesson };
+    }
+    
+    // Sadece sınıf: 10-sinif-ders-notlari
+    const gradePattern = /^(\d+)-sinif-ders-notlari$/;
+    const gradeMatch = slug.match(gradePattern);
+    if (gradeMatch) {
+      return {
+        grade: `${gradeMatch[1]}-sinif`,
+        lesson: '',
+      };
+    }
+    
+    // TYT/AYT: tyt-ders-notlari, ayt-ders-notlari
+    if (slug === 'tyt-ders-notlari') {
+      return { grade: 'tyt', lesson: '' };
+    }
+    if (slug === 'ayt-ders-notlari') {
+      return { grade: 'ayt', lesson: '' };
+    }
+    
+    // Sadece ders: biyoloji-ders-notlari
+    const lessonPattern = /^(.+)-ders-notlari$/;
+    const lessonMatch = slug.match(lessonPattern);
+    if (lessonMatch) {
+      return {
+        grade: '',
+        lesson: lessonMatch[1],
+      };
+    }
+  }
+  
+  return { grade: '', lesson: '' };
+};
+
 export default function HomePage() {
   const router = useRouter();
+  const pathname = usePathname();
   const [notes, setNotes] = useState<Note[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -261,6 +321,13 @@ export default function HomePage() {
     totalLikes: 0,
     activeUsers: 0,
   });
+
+  // URL'den state'i güncelle
+  useEffect(() => {
+    const { grade, lesson } = parseSlugFromUrl(pathname);
+    setSelectedGrade(grade);
+    setSelectedLesson(lesson);
+  }, [pathname]);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -440,6 +507,12 @@ export default function HomePage() {
 
             {/* Auth Buttons / User Menu - Right */}
             <div className="flex-1 flex justify-end items-center space-x-4 ml-4">
+              <Link href="/leaderboard">
+                <Button variant="ghost" className="text-gray-700 hover:text-[#3B82F6] flex items-center gap-2">
+                  <Trophy className="h-4 w-4" />
+                  <span className="hidden sm:inline">Liderlik Tablosu</span>
+                </Button>
+              </Link>
               {!userRole ? (
                 <>
                   <Link href="/login">
@@ -653,7 +726,11 @@ export default function HomePage() {
                   <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50 max-h-64 overflow-y-auto">
                     <button
                       onClick={() => {
-                        setSelectedGrade('');
+                        if (selectedLesson) {
+                          router.push(`/ders-notlari/${selectedLesson}-ders-notlari`);
+                        } else {
+                          router.push('/');
+                        }
                         setShowGradeDropdown(false);
                       }}
                       className={`w-full text-left px-4 py-2 text-sm transition-colors ${
@@ -666,20 +743,27 @@ export default function HomePage() {
                     </button>
                     {['9-sinif', '10-sinif', '11-sinif', '12-sinif'].map((gradeSlug) => {
                       const gradeName = gradeSlug.replace('-', '. ').replace('sinif', 'Sınıf');
-                      const gradeUrl = `/ders-notlari/${gradeSlug}-ders-notlari`;
+                      const getGradeUrl = () => {
+                        if (selectedLesson) {
+                          return `/ders-notlari/${gradeSlug}-${selectedLesson}-ders-notlari`;
+                        }
+                        return `/ders-notlari/${gradeSlug}-ders-notlari`;
+                      };
                       return (
-                        <Link
+                        <button
                           key={gradeSlug}
-                          href={gradeUrl}
-                          onClick={() => setShowGradeDropdown(false)}
-                          className={`w-full text-left px-4 py-2 text-sm transition-colors block ${
+                          onClick={() => {
+                            router.push(getGradeUrl());
+                            setShowGradeDropdown(false);
+                          }}
+                          className={`w-full text-left px-4 py-2 text-sm transition-colors ${
                             selectedGrade === gradeSlug
                               ? 'text-[#3B82F6] bg-blue-50 font-medium'
                               : 'text-gray-700 hover:bg-gray-100'
                           }`}
                         >
                           {gradeName}
-                        </Link>
+                        </button>
                       );
                     })}
                   </div>
@@ -688,11 +772,10 @@ export default function HomePage() {
               
               <button
                 onClick={() => {
-                  setSelectedLesson('');
-                  setSelectedGrade('');
+                  router.push('/');
                 }}
                 className={`px-4 py-2 text-sm font-medium transition-colors ${
-                  !selectedLesson && !selectedGrade
+                  !selectedLesson && !selectedGrade && pathname === '/'
                     ? 'text-[#3B82F6] border-b-2 border-[#3B82F6]'
                     : 'text-gray-700 hover:text-[#3B82F6]'
                 }`}
@@ -712,11 +795,18 @@ export default function HomePage() {
                 { name: 'Felsefe', slug: 'felsefe' },
                 { name: 'İngilizce', slug: 'ingilizce' },
               ].map((subject) => {
-                const lessonUrl = `/ders-notlari/${subject.slug}-ders-notlari`;
+                const getLessonUrl = () => {
+                  if (selectedGrade) {
+                    return `/ders-notlari/${selectedGrade}-${subject.slug}-ders-notlari`;
+                  }
+                  return `/ders-notlari/${subject.slug}-ders-notlari`;
+                };
                 return (
-                  <Link
+                  <button
                     key={subject.slug}
-                    href={lessonUrl}
+                    onClick={() => {
+                      router.push(getLessonUrl());
+                    }}
                     className={`px-2 py-2 text-sm transition-colors whitespace-nowrap ${
                       selectedLesson === subject.slug
                         ? 'text-[#3B82F6] font-medium border-b-2 border-[#3B82F6]'
@@ -724,7 +814,7 @@ export default function HomePage() {
                     }`}
                   >
                     {subject.name}
-                  </Link>
+                  </button>
                 );
               })}
             </div>
@@ -733,8 +823,7 @@ export default function HomePage() {
             <div className="flex items-center space-x-3 overflow-x-auto pb-2">
               <button
                 onClick={() => {
-                  setSelectedGrade('');
-                  setSelectedLesson('');
+                  router.push('/');
                 }}
                 className="px-4 py-2 rounded-full text-white text-sm font-medium bg-gradient-to-r from-green-500 to-purple-500 hover:from-green-600 hover:to-purple-600 transition-all whitespace-nowrap flex items-center space-x-2 shadow-sm"
               >
@@ -744,11 +833,18 @@ export default function HomePage() {
               
               {['9-sinif', '10-sinif', '11-sinif', '12-sinif'].map((gradeSlug) => {
                 const gradeName = gradeSlug.replace('-', '. ').replace('sinif', 'Sınıf Ders Notları');
-                const gradeUrl = `/ders-notlari/${gradeSlug}-ders-notlari`;
+                const getGradeUrl = () => {
+                  if (selectedLesson) {
+                    return `/ders-notlari/${gradeSlug}-${selectedLesson}-ders-notlari`;
+                  }
+                  return `/ders-notlari/${gradeSlug}-ders-notlari`;
+                };
                 return (
-                  <Link
+                  <button
                     key={gradeSlug}
-                    href={gradeUrl}
+                    onClick={() => {
+                      router.push(getGradeUrl());
+                    }}
                     className={`px-4 py-2 rounded-full text-white text-sm font-medium transition-all whitespace-nowrap flex items-center space-x-2 shadow-sm ${
                       selectedGrade === gradeSlug
                         ? 'bg-gradient-to-r from-green-600 to-purple-700 scale-105'
@@ -757,17 +853,16 @@ export default function HomePage() {
                   >
                     <Layers className="h-4 w-4" />
                     <span>{gradeName}</span>
-                  </Link>
+                  </button>
                 );
               })}
               
               <button
                 onClick={() => {
-                  setSelectedGrade('');
-                  setSelectedLesson('');
+                  router.push('/');
                 }}
                 className={`px-4 py-2 rounded-full text-white text-sm font-medium transition-all whitespace-nowrap flex items-center space-x-2 shadow-sm ${
-                  !selectedGrade && !selectedLesson
+                  !selectedGrade && !selectedLesson && pathname === '/'
                     ? 'bg-gradient-to-r from-purple-600 to-green-600 scale-105'
                     : 'bg-gradient-to-r from-purple-500 to-green-500 hover:from-purple-600 hover:to-green-600'
                 }`}

@@ -37,6 +37,76 @@ import {
 
 // Slug'dan grade ve lesson bilgisini çıkar
 const parseSlug = (slug: string) => {
+  // Kombinasyon URL'leri: 10-sinif-biyoloji-ders-notlari
+  const combinationPattern = /^(\d+)-sinif-(.+)-ders-notlari$/;
+  const match = slug.match(combinationPattern);
+  
+  if (match) {
+    const gradeNum = match[1];
+    const lessonSlug = match[2];
+    const lessonNames: { [key: string]: string } = {
+      'biyoloji': 'Biyoloji',
+      'fizik': 'Fizik',
+      'kimya': 'Kimya',
+      'matematik': 'Matematik',
+      'turkce': 'Türkçe',
+      'tarih': 'Tarih',
+      'cografya': 'Coğrafya',
+      'ingilizce': 'İngilizce',
+      'felsefe': 'Felsefe',
+      'din-kulturu': 'Din Kültürü',
+      'edebiyat': 'Edebiyat',
+    };
+    const lessonName = lessonNames[lessonSlug] || lessonSlug;
+    return {
+      grade: `${gradeNum}-sinif`,
+      lesson: lessonSlug,
+      title: `${gradeNum}. Sınıf ${lessonName} Ders Notları ve Detaylı Konu Anlatımı`,
+      description: `${gradeNum}. sınıf ${lessonName.toLowerCase()} ders notları, konu anlatımları ve detaylı özetler. Ücretsiz ${gradeNum}. sınıf ${lessonName.toLowerCase()} ders notları.`
+    };
+  }
+  
+  // TYT/AYT kombinasyonları: tyt-matematik-ders-notlari
+  if (slug.startsWith('tyt-') && slug.endsWith('-ders-notlari')) {
+    const lessonSlug = slug.replace('tyt-', '').replace('-ders-notlari', '');
+    const lessonNames: { [key: string]: string } = {
+      'matematik': 'Matematik',
+      'turkce': 'Türkçe',
+      'fizik': 'Fizik',
+      'kimya': 'Kimya',
+      'biyoloji': 'Biyoloji',
+      'tarih': 'Tarih',
+      'cografya': 'Coğrafya',
+    };
+    const lessonName = lessonNames[lessonSlug] || lessonSlug;
+    return {
+      grade: 'tyt',
+      lesson: lessonSlug,
+      title: `TYT ${lessonName} Ders Notları ve Detaylı Konu Anlatımı`,
+      description: `TYT ${lessonName.toLowerCase()} ders notları, konu anlatımları ve detaylı özetler. 2026 TYT hazırlık için ücretsiz ${lessonName.toLowerCase()} ders notları.`
+    };
+  }
+  
+  if (slug.startsWith('ayt-') && slug.endsWith('-ders-notlari')) {
+    const lessonSlug = slug.replace('ayt-', '').replace('-ders-notlari', '');
+    const lessonNames: { [key: string]: string } = {
+      'matematik': 'Matematik',
+      'fizik': 'Fizik',
+      'kimya': 'Kimya',
+      'biyoloji': 'Biyoloji',
+      'edebiyat': 'Edebiyat',
+      'tarih': 'Tarih',
+      'cografya': 'Coğrafya',
+    };
+    const lessonName = lessonNames[lessonSlug] || lessonSlug;
+    return {
+      grade: 'ayt',
+      lesson: lessonSlug,
+      title: `AYT ${lessonName} Ders Notları ve Detaylı Konu Anlatımı`,
+      description: `AYT ${lessonName.toLowerCase()} ders notları, konu anlatımları ve detaylı özetler. 2026 AYT hazırlık için ücretsiz ${lessonName.toLowerCase()} ders notları.`
+    };
+  }
+  
   const slugMap: { [key: string]: { grade?: string; lesson?: string; title: string; description: string } } = {
     '9-sinif-ders-notlari': {
       grade: '9-sinif',

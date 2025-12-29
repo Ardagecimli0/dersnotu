@@ -50,6 +50,13 @@ if (isNonWwwDomain && !shouldSkipRedirect) {
     return NextResponse.redirect(url, 301);
   }
 
+  // /ders-notlari/* URL'lerini homepage'e rewrite et (sayfa aynı kalacak, sadece URL değişecek)
+  if (pathname.startsWith('/ders-notlari/')) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/';
+    return NextResponse.rewrite(url);
+  }
+
   // Diğer tüm istekler için normal akışa devam et
   return NextResponse.next();
 }
