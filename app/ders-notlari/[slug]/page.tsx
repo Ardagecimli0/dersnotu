@@ -57,12 +57,26 @@ const parseSlug = (slug: string) => {
       'din-kulturu': 'Din Kültürü',
       'edebiyat': 'Edebiyat',
     };
+    const lessonDescriptions: { [key: string]: string } = {
+      'biyoloji': 'Hücre, genetik, ekoloji, canlıların sınıflandırılması ve daha fazlası için detaylı biyoloji konu anlatımları.',
+      'fizik': 'Mekanik, elektrik, manyetizma, optik, termodinamik ve daha fazlası için kapsamlı fizik ders notları.',
+      'kimya': 'Atom, periyodik tablo, kimyasal bağlar, reaksiyonlar, asit-baz ve daha fazlası için detaylı kimya notları.',
+      'matematik': 'Cebir, geometri, analiz, trigonometri, logaritma ve daha fazlası için kapsamlı matematik ders notları.',
+      'edebiyat': 'Türk edebiyatı, dünya edebiyatı, şiir, roman, hikaye analizi ve daha fazlası için detaylı edebiyat notları.',
+      'tarih': 'Osmanlı tarihi, Türkiye tarihi, dünya tarihi, inkılap tarihi ve daha fazlası için kapsamlı tarih ders notları.',
+      'cografya': 'Fiziki coğrafya, beşeri coğrafya, Türkiye coğrafyası, iklim, nüfus ve daha fazlası için detaylı coğrafya notları.',
+      'din-kulturu': 'İslam dini, ahlak, kültür, ibadet, inanç esasları ve daha fazlası için kapsamlı din kültürü ders notları.',
+      'felsefe': 'Felsefe tarihi, mantık, etik, estetik, bilgi felsefesi ve daha fazlası için detaylı felsefe ders notları.',
+      'ingilizce': 'Grammar, vocabulary, reading, writing, listening ve daha fazlası için kapsamlı İngilizce ders notları.',
+      'turkce': 'Dil bilgisi, edebiyat, kompozisyon, anlatım bozuklukları ve daha fazlası için detaylı Türkçe ders notları.',
+    };
     const lessonName = lessonNames[lessonSlug] || lessonSlug;
+    const lessonDesc = lessonDescriptions[lessonSlug] || '';
     return {
       grade: `${gradeNum}-sinif`,
       lesson: lessonSlug,
       title: `${gradeNum}. Sınıf ${lessonName} Ders Notları ve Detaylı Konu Anlatımı`,
-      description: `${gradeNum}. sınıf ${lessonName.toLowerCase()} ders notları, konu anlatımları ve detaylı özetler. Ücretsiz ${gradeNum}. sınıf ${lessonName.toLowerCase()} ders notları.`
+      description: `${gradeNum}. sınıf ${lessonName.toLowerCase()} ders notları ve detaylı konu anlatımları. Ücretsiz ${gradeNum}. sınıf ${lessonName.toLowerCase()} ders notları. ${lessonDesc} ${gradeNum}. sınıf öğrencileri için kaliteli ve güncel ders notlarını indirin.`
     };
   }
   
@@ -78,12 +92,22 @@ const parseSlug = (slug: string) => {
       'tarih': 'Tarih',
       'cografya': 'Coğrafya',
     };
+    const lessonDescriptions: { [key: string]: string } = {
+      'matematik': 'Cebir, geometri, problem çözme teknikleri ve daha fazlası için kapsamlı matematik ders notları.',
+      'turkce': 'Dil bilgisi, paragraf, anlam bilgisi, yazım kuralları ve daha fazlası için detaylı Türkçe ders notları.',
+      'fizik': 'Mekanik, elektrik, manyetizma, optik ve daha fazlası için kapsamlı fizik ders notları.',
+      'kimya': 'Atom, periyodik tablo, kimyasal reaksiyonlar, asit-baz ve daha fazlası için detaylı kimya notları.',
+      'biyoloji': 'Hücre, genetik, ekoloji, canlıların sınıflandırılması ve daha fazlası için detaylı biyoloji konu anlatımları.',
+      'tarih': 'Osmanlı tarihi, Türkiye tarihi, dünya tarihi ve daha fazlası için kapsamlı tarih ders notları.',
+      'cografya': 'Fiziki coğrafya, beşeri coğrafya, Türkiye coğrafyası ve daha fazlası için detaylı coğrafya notları.',
+    };
     const lessonName = lessonNames[lessonSlug] || lessonSlug;
+    const lessonDesc = lessonDescriptions[lessonSlug] || '';
     return {
       grade: 'tyt',
       lesson: lessonSlug,
       title: `TYT ${lessonName} Ders Notları ve Detaylı Konu Anlatımı`,
-      description: `TYT ${lessonName.toLowerCase()} ders notları, konu anlatımları ve detaylı özetler. 2026 TYT hazırlık için ücretsiz ${lessonName.toLowerCase()} ders notları.`
+      description: `TYT ${lessonName.toLowerCase()} ders notları ve detaylı konu anlatımları. 2026 TYT hazırlık için ücretsiz ${lessonName.toLowerCase()} ders notları. ${lessonDesc} TYT sınavına hazırlanmak için kaliteli ve güncel ders notlarını indirin.`
     };
   }
   
@@ -98,12 +122,22 @@ const parseSlug = (slug: string) => {
       'tarih': 'Tarih',
       'cografya': 'Coğrafya',
     };
+    const lessonDescriptions: { [key: string]: string } = {
+      'matematik': 'Cebir, geometri, analiz, trigonometri, logaritma ve daha fazlası için kapsamlı matematik ders notları.',
+      'fizik': 'Mekanik, elektrik, manyetizma, optik, termodinamik ve daha fazlası için kapsamlı fizik ders notları.',
+      'kimya': 'Atom, periyodik tablo, kimyasal bağlar, reaksiyonlar, asit-baz ve daha fazlası için detaylı kimya notları.',
+      'biyoloji': 'Hücre, genetik, ekoloji, canlıların sınıflandırılması ve daha fazlası için detaylı biyoloji konu anlatımları.',
+      'edebiyat': 'Türk edebiyatı, dünya edebiyatı, şiir, roman, hikaye analizi ve daha fazlası için detaylı edebiyat notları.',
+      'tarih': 'Osmanlı tarihi, Türkiye tarihi, dünya tarihi, inkılap tarihi ve daha fazlası için kapsamlı tarih ders notları.',
+      'cografya': 'Fiziki coğrafya, beşeri coğrafya, Türkiye coğrafyası, iklim, nüfus ve daha fazlası için detaylı coğrafya notları.',
+    };
     const lessonName = lessonNames[lessonSlug] || lessonSlug;
+    const lessonDesc = lessonDescriptions[lessonSlug] || '';
     return {
       grade: 'ayt',
       lesson: lessonSlug,
       title: `AYT ${lessonName} Ders Notları ve Detaylı Konu Anlatımı`,
-      description: `AYT ${lessonName.toLowerCase()} ders notları, konu anlatımları ve detaylı özetler. 2026 AYT hazırlık için ücretsiz ${lessonName.toLowerCase()} ders notları.`
+      description: `AYT ${lessonName.toLowerCase()} ders notları ve detaylı konu anlatımları. 2026 AYT hazırlık için ücretsiz ${lessonName.toLowerCase()} ders notları. ${lessonDesc} AYT sınavına hazırlanmak için kaliteli ve güncel ders notlarını indirin.`
     };
   }
   
@@ -241,15 +275,42 @@ export default function DersNotlariPage() {
   useEffect(() => {
     // SEO Meta Tags
     document.title = `${pageTitle} | DersNotu.net`;
-    const metaDescription = document.querySelector('meta[name="description"]');
-    if (metaDescription) {
-      metaDescription.setAttribute('content', pageDescription);
-    } else {
-      const meta = document.createElement('meta');
-      meta.name = 'description';
-      meta.content = pageDescription;
-      document.head.appendChild(meta);
+    
+    // Meta description güncelle
+    let metaDescription = document.querySelector('meta[name="description"]');
+    if (!metaDescription) {
+      metaDescription = document.createElement('meta');
+      metaDescription.setAttribute('name', 'description');
+      document.head.appendChild(metaDescription);
     }
+    metaDescription.setAttribute('content', pageDescription);
+    
+    // Open Graph description güncelle
+    let ogDescription = document.querySelector('meta[property="og:description"]');
+    if (!ogDescription) {
+      ogDescription = document.createElement('meta');
+      ogDescription.setAttribute('property', 'og:description');
+      document.head.appendChild(ogDescription);
+    }
+    ogDescription.setAttribute('content', pageDescription);
+    
+    // Twitter description güncelle
+    let twitterDescription = document.querySelector('meta[name="twitter:description"]');
+    if (!twitterDescription) {
+      twitterDescription = document.createElement('meta');
+      twitterDescription.setAttribute('name', 'twitter:description');
+      document.head.appendChild(twitterDescription);
+    }
+    twitterDescription.setAttribute('content', pageDescription);
+    
+    // Canonical URL güncelle
+    let canonical = document.querySelector('link[rel="canonical"]');
+    if (!canonical) {
+      canonical = document.createElement('link');
+      canonical.setAttribute('rel', 'canonical');
+      document.head.appendChild(canonical);
+    }
+    canonical.setAttribute('href', `https://dersnotu.net/ders-notlari/${slug}`);
 
     const token = localStorage.getItem('token');
     if (token) {

@@ -435,10 +435,12 @@ export default function HomePage() {
       '10-sinif': '10. Sınıf',
       '11-sinif': '11. Sınıf',
       '12-sinif': '12. Sınıf',
+      'tyt': 'TYT',
+      'ayt': 'AYT',
     };
 
     const lessonName = selectedLesson ? lessonNames[selectedLesson] || selectedLesson : '';
-    const gradeName = selectedGrade ? gradeNames[selectedGrade] || selectedGrade : '';
+    const gradeName = selectedGrade ? gradeNames[selectedGrade] || (selectedGrade === 'tyt' ? 'TYT' : selectedGrade === 'ayt' ? 'AYT' : selectedGrade) : '';
 
     if (gradeName && lessonName) {
       return `${gradeName} ${lessonName} Ders Notları ve Detaylı Konu Anlatımı`;
@@ -449,6 +451,121 @@ export default function HomePage() {
     }
     return 'Ücretsiz Ders Notları';
   };
+
+  // Meta description oluşturma fonksiyonu
+  const getPageDescription = () => {
+    const lessonNames: { [key: string]: string } = {
+      'biyoloji': 'Biyoloji',
+      'fizik': 'Fizik',
+      'kimya': 'Kimya',
+      'matematik': 'Matematik',
+      'edebiyat': 'Edebiyat',
+      'tarih': 'Tarih',
+      'cografya': 'Coğrafya',
+      'din-kulturu': 'Din Kültürü',
+      'felsefe': 'Felsefe',
+      'ingilizce': 'İngilizce',
+    };
+
+    const lessonDescriptions: { [key: string]: string } = {
+      'biyoloji': 'Hücre, genetik, ekoloji, canlıların sınıflandırılması ve daha fazlası için detaylı biyoloji konu anlatımları.',
+      'fizik': 'Mekanik, elektrik, manyetizma, optik, termodinamik ve daha fazlası için kapsamlı fizik ders notları.',
+      'kimya': 'Atom, periyodik tablo, kimyasal bağlar, reaksiyonlar, asit-baz ve daha fazlası için detaylı kimya notları.',
+      'matematik': 'Cebir, geometri, analiz, trigonometri, logaritma ve daha fazlası için kapsamlı matematik ders notları.',
+      'edebiyat': 'Türk edebiyatı, dünya edebiyatı, şiir, roman, hikaye analizi ve daha fazlası için detaylı edebiyat notları.',
+      'tarih': 'Osmanlı tarihi, Türkiye tarihi, dünya tarihi, inkılap tarihi ve daha fazlası için kapsamlı tarih ders notları.',
+      'cografya': 'Fiziki coğrafya, beşeri coğrafya, Türkiye coğrafyası, iklim, nüfus ve daha fazlası için detaylı coğrafya notları.',
+      'din-kulturu': 'İslam dini, ahlak, kültür, ibadet, inanç esasları ve daha fazlası için kapsamlı din kültürü ders notları.',
+      'felsefe': 'Felsefe tarihi, mantık, etik, estetik, bilgi felsefesi ve daha fazlası için detaylı felsefe ders notları.',
+      'ingilizce': 'Grammar, vocabulary, reading, writing, listening ve daha fazlası için kapsamlı İngilizce ders notları.',
+    };
+
+    const gradeDescriptions: { [key: string]: string } = {
+      '9-sinif': '9. sınıf öğrencileri için tüm derslerden ücretsiz ders notları. Matematik, Fizik, Kimya, Biyoloji, Türkçe, Tarih, Coğrafya ve daha fazlası.',
+      '10-sinif': '10. sınıf öğrencileri için tüm derslerden ücretsiz ders notları. Matematik, Fizik, Kimya, Biyoloji, Türkçe, Tarih, Coğrafya ve daha fazlası.',
+      '11-sinif': '11. sınıf öğrencileri için tüm derslerden ücretsiz ders notları. YKS hazırlık için Matematik, Fizik, Kimya, Biyoloji, Türkçe, Tarih, Coğrafya ve daha fazlası.',
+      '12-sinif': '12. sınıf öğrencileri için tüm derslerden ücretsiz ders notları. YKS hazırlık için Matematik, Fizik, Kimya, Biyoloji, Türkçe, Tarih, Coğrafya ve daha fazlası.',
+      'tyt': 'TYT (Temel Yeterlilik Testi) hazırlık için ücretsiz ders notları. 2026 TYT için Matematik, Türkçe, Fizik, Kimya, Biyoloji, Tarih, Coğrafya ve daha fazlası.',
+      'ayt': 'AYT (Alan Yeterlilik Testi) hazırlık için ücretsiz ders notları. 2026 AYT için Matematik, Fizik, Kimya, Biyoloji, Edebiyat, Tarih, Coğrafya ve daha fazlası.',
+    };
+
+    const lessonName = selectedLesson ? lessonNames[selectedLesson] || selectedLesson : '';
+    const lessonDesc = selectedLesson ? lessonDescriptions[selectedLesson] || '' : '';
+    const gradeName = selectedGrade ? (selectedGrade === 'tyt' ? 'TYT' : selectedGrade === 'ayt' ? 'AYT' : selectedGrade.replace('-', '. ').replace('sinif', 'Sınıf')) : '';
+    const gradeDesc = selectedGrade ? gradeDescriptions[selectedGrade] || '' : '';
+
+    // Kombinasyon: Sınıf + Ders
+    if (gradeName && lessonName) {
+      if (selectedGrade === 'tyt') {
+        return `TYT ${lessonName} ders notları ve detaylı konu anlatımları. 2026 TYT hazırlık için ücretsiz ${lessonName.toLowerCase()} ders notları. ${lessonDesc} TYT sınavına hazırlanmak için kaliteli ve güncel ders notlarını indirin.`;
+      }
+      if (selectedGrade === 'ayt') {
+        return `AYT ${lessonName} ders notları ve detaylı konu anlatımları. 2026 AYT hazırlık için ücretsiz ${lessonName.toLowerCase()} ders notları. ${lessonDesc} AYT sınavına hazırlanmak için kaliteli ve güncel ders notlarını indirin.`;
+      }
+      return `${gradeName} ${lessonName} ders notları ve detaylı konu anlatımları. Ücretsiz ${gradeName.toLowerCase()} ${lessonName.toLowerCase()} ders notları. ${lessonDesc} ${gradeName} öğrencileri için kaliteli ve güncel ders notlarını indirin.`;
+    }
+    
+    // Sadece Ders
+    if (lessonName) {
+      return `${lessonName} ders notları ve detaylı konu anlatımları. 9, 10, 11, 12. sınıf ve YKS hazırlık için ücretsiz ${lessonName.toLowerCase()} ders notları. ${lessonDesc} Tüm sınıflar için kaliteli ve güncel ders notlarını indirin.`;
+    }
+    
+    // Sadece Sınıf
+    if (gradeName) {
+      return gradeDesc;
+    }
+    
+    // Ana Sayfa
+    return 'Ücretsiz lise ders notları platformu. 9, 10, 11, 12. sınıf ders notları, YKS hazırlık, TYT ve AYT notları. Matematik, Fizik, Kimya, Biyoloji, Türkçe, Tarih, Coğrafya dersleri için kaliteli ve güncel ders notlarını ücretsiz indir. 2026 YKS, 2026 TYT, 2026 AYT hazırlık için en güncel ders notları.';
+  };
+
+  // Meta tag'leri güncelle
+  useEffect(() => {
+    const title = getPageTitle();
+    const description = getPageDescription();
+    
+    // Document title güncelle
+    document.title = `${title} | DersNotu.net`;
+    
+    // Meta description güncelle
+    let metaDescription = document.querySelector('meta[name="description"]');
+    if (!metaDescription) {
+      metaDescription = document.createElement('meta');
+      metaDescription.setAttribute('name', 'description');
+      document.head.appendChild(metaDescription);
+    }
+    metaDescription.setAttribute('content', description);
+    
+    // Open Graph description güncelle
+    let ogDescription = document.querySelector('meta[property="og:description"]');
+    if (!ogDescription) {
+      ogDescription = document.createElement('meta');
+      ogDescription.setAttribute('property', 'og:description');
+      document.head.appendChild(ogDescription);
+    }
+    ogDescription.setAttribute('content', description);
+    
+    // Twitter description güncelle
+    let twitterDescription = document.querySelector('meta[name="twitter:description"]');
+    if (!twitterDescription) {
+      twitterDescription = document.createElement('meta');
+      twitterDescription.setAttribute('name', 'twitter:description');
+      document.head.appendChild(twitterDescription);
+    }
+    twitterDescription.setAttribute('content', description);
+    
+    // Canonical URL güncelle
+    let canonical = document.querySelector('link[rel="canonical"]');
+    if (!canonical) {
+      canonical = document.createElement('link');
+      canonical.setAttribute('rel', 'canonical');
+      document.head.appendChild(canonical);
+    }
+    const canonicalUrl = pathname === '/' 
+      ? 'https://dersnotu.net' 
+      : `https://dersnotu.net${pathname}`;
+    canonical.setAttribute('href', canonicalUrl);
+  }, [pathname, selectedLesson, selectedGrade]);
 
   const filteredNotes = notes.filter((note: Note) => 
     note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
