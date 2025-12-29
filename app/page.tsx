@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -254,6 +254,7 @@ export default function HomePage() {
   const [userName, setUserName] = useState<string>('');
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const [showGradeDropdown, setShowGradeDropdown] = useState(false);
   const [stats, setStats] = useState({
     totalNotes: 0,
     totalViews: 0,
@@ -338,13 +339,51 @@ export default function HomePage() {
       if (showUserMenu && !target.closest('.user-menu-container')) {
         setShowUserMenu(false);
       }
+      if (showGradeDropdown && !target.closest('.grade-dropdown-container')) {
+        setShowGradeDropdown(false);
+      }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [showUserMenu]);
+  }, [showUserMenu, showGradeDropdown]);
 
-  const filteredNotes = notes.filter(note => 
+  // Başlık oluşturma fonksiyonu
+  const getPageTitle = () => {
+    const lessonNames: { [key: string]: string } = {
+      'biyoloji': 'Biyoloji',
+      'fizik': 'Fizik',
+      'kimya': 'Kimya',
+      'matematik': 'Matematik',
+      'edebiyat': 'Edebiyat',
+      'tarih': 'Tarih',
+      'cografya': 'Coğrafya',
+      'din-kulturu': 'Din Kültürü',
+      'felsefe': 'Felsefe',
+      'ingilizce': 'İngilizce',
+    };
+
+    const gradeNames: { [key: string]: string } = {
+      '9-sinif': '9. Sınıf',
+      '10-sinif': '10. Sınıf',
+      '11-sinif': '11. Sınıf',
+      '12-sinif': '12. Sınıf',
+    };
+
+    const lessonName = selectedLesson ? lessonNames[selectedLesson] || selectedLesson : '';
+    const gradeName = selectedGrade ? gradeNames[selectedGrade] || selectedGrade : '';
+
+    if (gradeName && lessonName) {
+      return `${gradeName} ${lessonName} Ders Notları ve Detaylı Konu Anlatımı`;
+    } else if (lessonName) {
+      return `${lessonName} Ders Notları ve Detaylı Konu Anlatımı`;
+    } else if (gradeName) {
+      return `${gradeName} Ders Notları ve Detaylı Konu Anlatımı`;
+    }
+    return 'Ücretsiz Ders Notları';
+  };
+
+  const filteredNotes = notes.filter((note: Note) => 
     note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     note.topic?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     note.topic?.lesson?.name?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -385,7 +424,7 @@ export default function HomePage() {
                   type="text"
                   placeholder="Not ara..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
                   className="pl-10 pr-4 py-2 w-full border-gray-200 rounded-xl focus:border-[#3B82F6] focus:ring-[#3B82F6]"
                 />
               </div>
@@ -488,7 +527,7 @@ export default function HomePage() {
               type="text"
               placeholder="Not ara..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
               className="pl-10 pr-10 py-2 w-full border-gray-200 rounded-xl focus:border-[#3B82F6] focus:ring-[#3B82F6]"
               autoFocus
             />
@@ -588,7 +627,7 @@ export default function HomePage() {
         <section className="mb-12">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Ücretsiz Ders Notları</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">{getPageTitle()}</h2>
               <p className="text-gray-600">Onaylanmış ders notlarını keşfedin</p>
             </div>
           </div>
@@ -597,9 +636,55 @@ export default function HomePage() {
           <div className="mb-8 space-y-4">
             {/* Top Row - Subject Filters */}
             <div className="flex items-center space-x-6 overflow-x-auto pb-2 border-b border-gray-200">
-              <div className="flex items-center space-x-2 text-gray-700 cursor-pointer hover:text-[#3B82F6] transition-colors">
-                <span className="font-medium">Tüm Sınıflar</span>
-                <ChevronDown className="h-4 w-4" />
+              <div className="relative grade-dropdown-container">
+                <button
+                  onClick={() => setShowGradeDropdown(!showGradeDropdown)}
+                  className="flex items-center space-x-2 text-gray-700 hover:text-[#3B82F6] transition-colors"
+                >
+                  <span className="font-medium">
+                    {selectedGrade 
+                      ? selectedGrade.replace('-', '. ').replace('sinif', 'Sınıf')
+                      : 'Tüm Sınıflar'}
+                  </span>
+                  <ChevronDown className="h-4 w-4" />
+                </button>
+                {showGradeDropdown && (
+                  <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                    {['9-sinif', '10-sinif', '11-sinif', '12-sinif'].map((gradeSlug) => {
+                      const gradeName = gradeSlug.replace('-', '. ').replace('sinif', 'Sınıf');
+                      return (
+                        <button
+                          key={gradeSlug}
+                          onClick={() => {
+                            setSelectedGrade(gradeSlug);
+                            setShowGradeDropdown(false);
+                            // Ders seçiliyse koru, değilse sıfırla
+                          }}
+                          className={`w-full text-left px-4 py-2 text-sm transition-colors ${
+                            selectedGrade === gradeSlug
+                              ? 'text-[#3B82F6] bg-blue-50 font-medium'
+                              : 'text-gray-700 hover:bg-gray-100'
+                          }`}
+                        >
+                          {gradeName}
+                        </button>
+                      );
+                    })}
+                    <button
+                      onClick={() => {
+                        setSelectedGrade('');
+                        setShowGradeDropdown(false);
+                      }}
+                      className={`w-full text-left px-4 py-2 text-sm transition-colors ${
+                        !selectedGrade
+                          ? 'text-[#3B82F6] bg-blue-50 font-medium'
+                          : 'text-gray-700 hover:bg-gray-100'
+                      }`}
+                    >
+                      Tüm Sınıflar
+                    </button>
+                  </div>
+                )}
               </div>
               
               <button
@@ -632,11 +717,11 @@ export default function HomePage() {
                   key={subject.slug}
                   onClick={() => {
                     setSelectedLesson(subject.slug);
-                    setSelectedGrade('');
+                    // Sınıf seçimini koru, sadece ders değişsin
                   }}
                   className={`px-2 py-2 text-sm transition-colors whitespace-nowrap ${
                     selectedLesson === subject.slug
-                      ? 'text-[#3B82F6] font-medium'
+                      ? 'text-[#3B82F6] font-medium border-b-2 border-[#3B82F6]'
                       : 'text-gray-700 hover:text-[#3B82F6]'
                   }`}
                 >
@@ -665,7 +750,7 @@ export default function HomePage() {
                     key={gradeSlug}
                     onClick={() => {
                       setSelectedGrade(gradeSlug);
-                      setSelectedLesson('');
+                      // Ders seçimini koru, sadece sınıf değişsin
                     }}
                     className={`px-4 py-2 rounded-full text-white text-sm font-medium transition-all whitespace-nowrap flex items-center space-x-2 shadow-sm ${
                       selectedGrade === gradeSlug
@@ -684,7 +769,11 @@ export default function HomePage() {
                   setSelectedGrade('');
                   setSelectedLesson('');
                 }}
-                className="px-4 py-2 rounded-full text-white text-sm font-medium bg-gradient-to-r from-purple-500 to-green-500 hover:from-purple-600 hover:to-green-600 transition-all whitespace-nowrap flex items-center space-x-2 shadow-sm"
+                className={`px-4 py-2 rounded-full text-white text-sm font-medium transition-all whitespace-nowrap flex items-center space-x-2 shadow-sm ${
+                  !selectedGrade && !selectedLesson
+                    ? 'bg-gradient-to-r from-purple-600 to-green-600 scale-105'
+                    : 'bg-gradient-to-r from-purple-500 to-green-500 hover:from-purple-600 hover:to-green-600'
+                }`}
               >
                 <Layers className="h-4 w-4" />
                 <span>Lise Konuları</span>
@@ -709,7 +798,7 @@ export default function HomePage() {
             </div>
           ) : filteredNotes.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredNotes.map((note, index) => {
+              {filteredNotes.map((note: Note, index: number) => {
                 const lessonImage = getLessonImage(
                   note.topic?.lesson?.name || '',
                   note.topic?.name || ''
@@ -725,7 +814,7 @@ export default function HomePage() {
                               src={note.imageUrl}
                               alt={note.title}
                               className="w-full h-full object-contain bg-gray-100"
-                              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                              onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                             />
                             {/* Overlay gradient */}
                             <div className={`absolute inset-0 bg-gradient-to-br ${lessonImage.gradient} opacity-60`}></div>
