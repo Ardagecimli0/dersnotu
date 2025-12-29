@@ -557,8 +557,9 @@ export default function HomePage() {
             </p>
             {/* SEO için gizli anahtar kelimeler */}
             <p className="sr-only">
-              Lise ders notları, YKS notları, TYT notları, AYT notları, 9. sınıf ders notları, 
-              10. sınıf ders notları, 11. sınıf ders notları, 12. sınıf ders notları, 
+              Ders Notu, Ders Notları, Lise Ders Notları, 9. Sınıf Ders Notları, 10. Sınıf Ders Notları, 
+              11. Sınıf Ders Notları, 12. Sınıf Ders Notları, YKS, TYT, AYT, 2026 YKS, 2026 TYT, 2026 AYT, 
+              YKS 2026, TYT 2026, AYT 2026, YKS notları, TYT notları, AYT notları, 
               ücretsiz ders notları, konu anlatımı, ders özeti, sınav hazırlık
             </p>
           </div>
@@ -624,11 +625,11 @@ export default function HomePage() {
         </section>
 
         {/* Notes Section */}
-        <section className="mb-12">
+        <section className="mb-12" itemScope itemType="https://schema.org/ItemList">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">{getPageTitle()}</h2>
-              <p className="text-gray-600">Onaylanmış ders notlarını keşfedin</p>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2" itemProp="name">{getPageTitle()}</h2>
+              <p className="text-gray-600" itemProp="description">Onaylanmış ders notlarını keşfedin</p>
             </div>
           </div>
 
@@ -649,27 +650,7 @@ export default function HomePage() {
                   <ChevronDown className="h-4 w-4" />
                 </button>
                 {showGradeDropdown && (
-                  <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
-                    {['9-sinif', '10-sinif', '11-sinif', '12-sinif'].map((gradeSlug) => {
-                      const gradeName = gradeSlug.replace('-', '. ').replace('sinif', 'Sınıf');
-                      return (
-                        <button
-                          key={gradeSlug}
-                          onClick={() => {
-                            setSelectedGrade(gradeSlug);
-                            setShowGradeDropdown(false);
-                            // Ders seçiliyse koru, değilse sıfırla
-                          }}
-                          className={`w-full text-left px-4 py-2 text-sm transition-colors ${
-                            selectedGrade === gradeSlug
-                              ? 'text-[#3B82F6] bg-blue-50 font-medium'
-                              : 'text-gray-700 hover:bg-gray-100'
-                          }`}
-                        >
-                          {gradeName}
-                        </button>
-                      );
-                    })}
+                  <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50 max-h-64 overflow-y-auto">
                     <button
                       onClick={() => {
                         setSelectedGrade('');
@@ -683,6 +664,24 @@ export default function HomePage() {
                     >
                       Tüm Sınıflar
                     </button>
+                    {['9-sinif', '10-sinif', '11-sinif', '12-sinif'].map((gradeSlug) => {
+                      const gradeName = gradeSlug.replace('-', '. ').replace('sinif', 'Sınıf');
+                      const gradeUrl = `/ders-notlari/${gradeSlug}-ders-notlari`;
+                      return (
+                        <Link
+                          key={gradeSlug}
+                          href={gradeUrl}
+                          onClick={() => setShowGradeDropdown(false)}
+                          className={`w-full text-left px-4 py-2 text-sm transition-colors block ${
+                            selectedGrade === gradeSlug
+                              ? 'text-[#3B82F6] bg-blue-50 font-medium'
+                              : 'text-gray-700 hover:bg-gray-100'
+                          }`}
+                        >
+                          {gradeName}
+                        </Link>
+                      );
+                    })}
                   </div>
                 )}
               </div>
@@ -712,22 +711,22 @@ export default function HomePage() {
                 { name: 'Din Kültürü', slug: 'din-kulturu' },
                 { name: 'Felsefe', slug: 'felsefe' },
                 { name: 'İngilizce', slug: 'ingilizce' },
-              ].map((subject) => (
-                <button
-                  key={subject.slug}
-                  onClick={() => {
-                    setSelectedLesson(subject.slug);
-                    // Sınıf seçimini koru, sadece ders değişsin
-                  }}
-                  className={`px-2 py-2 text-sm transition-colors whitespace-nowrap ${
-                    selectedLesson === subject.slug
-                      ? 'text-[#3B82F6] font-medium border-b-2 border-[#3B82F6]'
-                      : 'text-gray-700 hover:text-[#3B82F6]'
-                  }`}
-                >
-                  {subject.name}
-                </button>
-              ))}
+              ].map((subject) => {
+                const lessonUrl = `/ders-notlari/${subject.slug}-ders-notlari`;
+                return (
+                  <Link
+                    key={subject.slug}
+                    href={lessonUrl}
+                    className={`px-2 py-2 text-sm transition-colors whitespace-nowrap ${
+                      selectedLesson === subject.slug
+                        ? 'text-[#3B82F6] font-medium border-b-2 border-[#3B82F6]'
+                        : 'text-gray-700 hover:text-[#3B82F6]'
+                    }`}
+                  >
+                    {subject.name}
+                  </Link>
+                );
+              })}
             </div>
 
             {/* Bottom Row - Grade Filters */}
@@ -745,13 +744,11 @@ export default function HomePage() {
               
               {['9-sinif', '10-sinif', '11-sinif', '12-sinif'].map((gradeSlug) => {
                 const gradeName = gradeSlug.replace('-', '. ').replace('sinif', 'Sınıf Ders Notları');
+                const gradeUrl = `/ders-notlari/${gradeSlug}-ders-notlari`;
                 return (
-                  <button
+                  <Link
                     key={gradeSlug}
-                    onClick={() => {
-                      setSelectedGrade(gradeSlug);
-                      // Ders seçimini koru, sadece sınıf değişsin
-                    }}
+                    href={gradeUrl}
                     className={`px-4 py-2 rounded-full text-white text-sm font-medium transition-all whitespace-nowrap flex items-center space-x-2 shadow-sm ${
                       selectedGrade === gradeSlug
                         ? 'bg-gradient-to-r from-green-600 to-purple-700 scale-105'
@@ -760,7 +757,7 @@ export default function HomePage() {
                   >
                     <Layers className="h-4 w-4" />
                     <span>{gradeName}</span>
-                  </button>
+                  </Link>
                 );
               })}
               
@@ -804,7 +801,7 @@ export default function HomePage() {
                   note.topic?.name || ''
                 );
                 return (
-                  <Link key={note.id} href={`/konu/${note.slug}`}>
+                  <Link key={note.id} href={`/konu/${note.slug}`} itemScope itemType="https://schema.org/Article">
                     <Card className="border-0 shadow-sm bg-white rounded-2xl hover:shadow-lg transition-all duration-200 group cursor-pointer overflow-hidden transform hover:scale-[1.02]">
                       {/* Görsel Header - Gradient Background */}
                       <div className={`relative h-48 overflow-hidden bg-gradient-to-br ${lessonImage.gradient} ${note.imageUrl ? '' : ''}`}>
@@ -850,7 +847,7 @@ export default function HomePage() {
 
                       <CardContent className="p-6">
                         {/* Title */}
-                        <h3 className="font-bold text-lg text-gray-900 mb-3 line-clamp-2 group-hover:text-[#3B82F6] transition-colors">
+                        <h3 className="font-bold text-lg text-gray-900 mb-3 line-clamp-2 group-hover:text-[#3B82F6] transition-colors" itemProp="name">
                           {note.title}
                         </h3>
 

@@ -102,6 +102,11 @@ export function Footer() {
                   Profil
                 </Link>
               </li>
+              <li>
+                <Link href="/yks-sayac" className="text-gray-600 hover:text-gray-900 text-sm transition-colors">
+                  YKS Sayaç
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -121,6 +126,11 @@ export function Footer() {
                   Gizlilik Sözleşmesi
                 </Link>
               </li>
+              <li>
+                <Link href="/yorum-politikasi" className="text-gray-600 hover:text-gray-900 text-sm transition-colors">
+                  Yorum Politikası
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -133,11 +143,6 @@ export function Footer() {
               <li>
                 <a href="mailto:info@dersnotu.net" className="hover:text-gray-900 transition-colors">
                   info@dersnotu.net
-                </a>
-              </li>
-              <li>
-                <a href="mailto:destek@dersnotu.net" className="hover:text-gray-900 transition-colors">
-                  destek@dersnotu.net
                 </a>
               </li>
             </ul>

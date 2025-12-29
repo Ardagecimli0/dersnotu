@@ -6,9 +6,9 @@ export function WebsiteStructuredData() {
     "@context": "https://schema.org",
     "@type": "WebSite",
     "name": "DersNotu.net",
-    "alternateName": ["Ders Notu", "DersNotu", "Lise Ders Notları"],
+    "alternateName": ["Ders Notu", "DersNotu", "Lise Ders Notları", "9. Sınıf Ders Notları", "10. Sınıf Ders Notları", "11. Sınıf Ders Notları", "12. Sınıf Ders Notları", "YKS", "TYT", "AYT", "2026 YKS", "2026 TYT", "2026 AYT"],
     "url": "https://dersnotu.net",
-    "description": "Ücretsiz lise ders notları platformu. 9, 10, 11, 12. sınıf ders notları, YKS hazırlık, TYT ve AYT notları.",
+    "description": "Ücretsiz lise ders notları platformu. 9, 10, 11, 12. sınıf ders notları, YKS hazırlık, TYT ve AYT notları. 2026 YKS, 2026 TYT, 2026 AYT için en güncel ders notları.",
     "inLanguage": "tr-TR",
     "potentialAction": {
       "@type": "SearchAction",
