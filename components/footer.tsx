@@ -93,6 +93,11 @@ export function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/biz-kimiz" className="text-gray-600 hover:text-gray-900 text-sm transition-colors">
+                  Biz Kimiz?
+                </Link>
+              </li>
+              <li>
                 <Link href="/dashboard" className="text-gray-600 hover:text-gray-900 text-sm transition-colors">
                   Not Yükle
                 </Link>

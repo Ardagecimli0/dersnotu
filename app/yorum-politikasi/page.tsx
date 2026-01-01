@@ -6,6 +6,18 @@ import { SiteHeader } from "@/components/site-header";
 import Link from 'next/link';
 
 export default function YorumPolitikasiPage() {
+  // SEO Meta Tags
+  React.useEffect(() => {
+    document.title = "Yorum Politikası | DersNotu.net";
+    let metaDescription = document.querySelector('meta[name="description"]');
+    if (!metaDescription) {
+      metaDescription = document.createElement('meta');
+      metaDescription.setAttribute('name', 'description');
+      document.head.appendChild(metaDescription);
+    }
+    metaDescription.setAttribute('content', 'DersNotu.net yorum politikası. Platform üzerinde yorum yaparken uyulması gereken kurallar, yasaklanan içerikler ve moderasyon süreci hakkında bilgi.');
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#F9FAFB]">
       <SiteHeader />

@@ -1,6 +1,11 @@
 import { Footer } from "@/components/footer";
 import { SiteHeader } from "@/components/site-header";
 
+export const metadata = {
+  title: "KVKK Aydınlatma Metni | DersNotu.net",
+  description: "DersNotu.net Kişisel Verilerin Korunması Kanunu (KVKK) Aydınlatma Metni. Kişisel verilerinizin nasıl işlendiği, korunduğu ve haklarınız hakkında bilgi.",
+};
+
 export default function KVKKPage() {
   return (
     <div className="min-h-screen bg-[#F9FAFB]">

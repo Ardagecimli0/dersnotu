@@ -112,6 +112,10 @@ export const metadata: Metadata = {
       "max-image-preview": "large",
       "max-snippet": -1,
     },
+    nocache: false,
+    noarchive: false,
+    nosnippet: false,
+    noimageindex: false,
   },
   verification: {
     // Google Search Console verification code can be added here

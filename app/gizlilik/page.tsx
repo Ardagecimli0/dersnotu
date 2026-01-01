@@ -1,6 +1,11 @@
 import { Footer } from "@/components/footer";
 import { SiteHeader } from "@/components/site-header";
 
+export const metadata = {
+  title: "Gizlilik Sözleşmesi | DersNotu.net",
+  description: "DersNotu.net gizlilik sözleşmesi. Kişisel bilgilerinizin nasıl toplandığı, kullanıldığı, korunduğu ve paylaşıldığı hakkında detaylı bilgi.",
+};
+
 export default function GizlilikPage() {
   return (
     <div className="min-h-screen bg-[#F9FAFB]">

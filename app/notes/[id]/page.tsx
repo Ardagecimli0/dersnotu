@@ -3,14 +3,13 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { notesApi, Note } from '@/lib/api';
 import { Footer } from '@/components/footer';
+import { SiteHeader } from '@/components/site-header';
 import { 
-  ArrowLeft, 
   Eye, 
   Heart, 
   FileText,
@@ -124,6 +123,7 @@ export default function NoteDetailPage() {
   const [commentName, setCommentName] = useState('');
   const [commentEmail, setCommentEmail] = useState('');
   const [commentText, setCommentText] = useState('');
+  const [comments, setComments] = useState<Array<{id: string; name: string; email: string; text: string; date: string}>>([]);
   const [reactions, setReactions] = useState({
     '❤️': 0,
     '😂': 0,
@@ -133,6 +133,7 @@ export default function NoteDetailPage() {
     '😢': 0,
     '😡': 0,
   });
+  const [userReactions, setUserReactions] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     const fetchNote = async () => {
@@ -140,6 +141,29 @@ export default function NoteDetailPage() {
         const noteId = params.id as string;
         const fetchedNote = await notesApi.getById(noteId);
         setNote(fetchedNote);
+
+        // SEO Meta Tags
+        document.title = `${fetchedNote.title} | DersNotu.net`;
+        let metaDescription = document.querySelector('meta[name="description"]');
+        if (!metaDescription) {
+          metaDescription = document.createElement('meta');
+          metaDescription.setAttribute('name', 'description');
+          document.head.appendChild(metaDescription);
+        }
+        metaDescription.setAttribute('content', `${fetchedNote.title} - ${fetchedNote.topic?.lesson?.name || ''} ders notu. ${fetchedNote.content ? fetchedNote.content.substring(0, 150) : ''}...`);
+
+        // LocalStorage'dan yorumları ve reaksiyonları yükle
+        const savedComments = localStorage.getItem(`comments_${noteId}`);
+        if (savedComments) {
+          setComments(JSON.parse(savedComments));
+        }
+
+        const savedReactions = localStorage.getItem(`reactions_${noteId}`);
+        if (savedReactions) {
+          const parsed = JSON.parse(savedReactions);
+          setReactions(parsed.counts || reactions);
+          setUserReactions(new Set(parsed.userReactions || []));
+        }
       } catch (error) {
         console.error('Not yüklenemedi:', error);
         router.push('/');
@@ -184,26 +208,7 @@ export default function NoteDetailPage() {
 
   return (
     <div className="min-h-screen bg-[#F9FAFB]">
-      {/* Header */}
-      <header className="sticky top-0 z-50 backdrop-blur-md bg-white/80 border-b border-gray-200/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
-            <Link href="/" className="flex items-center space-x-3">
-              <ArrowLeft className="h-5 w-5 text-gray-700" />
-              <span className="text-gray-700 hover:text-[#3B82F6]">Ana Sayfaya Dön</span>
-            </Link>
-            <Link href="/" className="flex items-center space-x-3">
-              <Image 
-                src="/logo1.png" 
-                alt="DersNotu.net" 
-                width={130} 
-                height={130}
-                className="object-contain"
-              />
-            </Link>
-          </div>
-        </div>
-      </header>
+      <SiteHeader />
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Note Header with Image */}
@@ -287,21 +292,44 @@ export default function NoteDetailPage() {
           <CardContent className="p-6">
             <h2 className="text-xl font-bold text-gray-900 mb-6 text-center">İçerik Nasıldı?</h2>
             <div className="flex items-center justify-center gap-4 flex-wrap">
-              {Object.entries(reactions).map(([emoji, count]) => (
-                <button
-                  key={emoji}
-                  onClick={() => {
-                    setReactions(prev => ({
-                      ...prev,
-                      [emoji]: prev[emoji as keyof typeof prev] + 1
-                    }));
-                  }}
-                  className="flex flex-col items-center gap-2 p-3 rounded-xl hover:bg-gray-50 transition-colors"
-                >
-                  <span className="text-3xl">{emoji}</span>
-                  <span className="text-sm font-medium text-gray-600">{count}</span>
-                </button>
-              ))}
+              {Object.entries(reactions).map(([emoji, count]) => {
+                const isReacted = userReactions.has(emoji);
+                return (
+                  <button
+                    key={emoji}
+                    onClick={() => {
+                      const noteId = params.id as string;
+                      const newReactions = { ...reactions };
+                      const newUserReactions = new Set(userReactions);
+                      
+                      if (isReacted) {
+                        newReactions[emoji as keyof typeof reactions] = Math.max(0, count - 1);
+                        newUserReactions.delete(emoji);
+                      } else {
+                        newReactions[emoji as keyof typeof reactions] = count + 1;
+                        newUserReactions.add(emoji);
+                      }
+                      
+                      setReactions(newReactions);
+                      setUserReactions(newUserReactions);
+                      
+                      // LocalStorage'a kaydet
+                      localStorage.setItem(`reactions_${noteId}`, JSON.stringify({
+                        counts: newReactions,
+                        userReactions: Array.from(newUserReactions)
+                      }));
+                    }}
+                    className={`flex flex-col items-center gap-2 p-3 rounded-xl transition-colors ${
+                      isReacted 
+                        ? 'bg-blue-50 border-2 border-[#3B82F6]' 
+                        : 'hover:bg-gray-50'
+                    }`}
+                  >
+                    <span className="text-3xl">{emoji}</span>
+                    <span className="text-sm font-medium text-gray-600">{count}</span>
+                  </button>
+                );
+              })}
             </div>
           </CardContent>
         </Card>
@@ -309,7 +337,25 @@ export default function NoteDetailPage() {
         {/* Comments Section */}
         <Card className="border-0 shadow-sm bg-white rounded-2xl">
           <CardContent className="p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-6">Yorumlar (0)</h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-6">Yorumlar ({comments.length})</h2>
+            
+            {/* Comments List */}
+            {comments.length > 0 && (
+              <div className="space-y-4 mb-6">
+                {comments.map((comment) => (
+                  <div key={comment.id} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                    <div className="flex items-start justify-between mb-2">
+                      <div>
+                        <p className="font-semibold text-gray-900">{comment.name}</p>
+                        <p className="text-sm text-gray-500">{comment.email}</p>
+                      </div>
+                      <p className="text-xs text-gray-400">{new Date(comment.date).toLocaleDateString('tr-TR')}</p>
+                    </div>
+                    <p className="text-gray-700">{comment.text}</p>
+                  </div>
+                ))}
+              </div>
+            )}
             
             {/* Comment Form */}
             <div className="space-y-4 mb-6">
@@ -363,9 +409,9 @@ export default function NoteDetailPage() {
                 />
                 <label htmlFor="consent" className="text-sm text-gray-600">
                   Yorum göndererek{' '}
-                  <a href="#" className="text-[#3B82F6] hover:underline">gizlilik sözleşmesi</a>
+                  <Link href="/gizlilik" className="text-[#3B82F6] hover:underline">gizlilik sözleşmesi</Link>
                   {' '}ve{' '}
-                  <a href="#" className="text-[#3B82F6] hover:underline">KVKK kurallarını</a>
+                  <Link href="/kvkk" className="text-[#3B82F6] hover:underline">KVKK kurallarını</Link>
                   {' '}kabul etmiş sayılırsınız.
                 </label>
               </div>
@@ -373,8 +419,24 @@ export default function NoteDetailPage() {
               <div className="flex justify-end">
                 <Button 
                   onClick={() => {
-                    // TODO: Yorum gönderme işlemi
-                    console.log('Yorum gönderiliyor...', { commentName, commentEmail, commentText });
+                    if (!commentName.trim() || !commentEmail.trim() || !commentText.trim()) {
+                      alert('Lütfen tüm alanları doldurun.');
+                      return;
+                    }
+                    
+                    const noteId = params.id as string;
+                    const newComment = {
+                      id: Date.now().toString(),
+                      name: commentName,
+                      email: commentEmail,
+                      text: commentText,
+                      date: new Date().toISOString()
+                    };
+                    
+                    const updatedComments = [...comments, newComment];
+                    setComments(updatedComments);
+                    localStorage.setItem(`comments_${noteId}`, JSON.stringify(updatedComments));
+                    
                     setCommentName('');
                     setCommentEmail('');
                     setCommentText('');

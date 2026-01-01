@@ -4,10 +4,14 @@ import { CreateNoteDto } from './dto/create-note.dto';
 import { PrismaService } from '../../providers/prisma.service';
 import defaultSlugify from 'slugify';
 import { XP_REWARDS } from '../xp/xp.service';
+import { GoogleIndexingService } from '../../services/google-indexing.service';
 
 @Injectable()
 export class NotesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private googleIndexingService: GoogleIndexingService,
+  ) {}
 
   async create(userId: string, createNoteDto: CreateNoteDto & { topicName?: string; lessonId?: number }) {
     // 1. Konu ID'sini bul veya oluştur
@@ -257,6 +261,14 @@ export class NotesService {
           type: 'EARN_NOTE_APPROVED',
           description: `Not Onayı: ${note.title}`,
         },
+      });
+
+      // 5. Google Indexing API'ye bildirim gönder (asenkron, hata olsa bile devam et)
+      const baseUrl = process.env.BASE_URL || 'https://dersnotu.net';
+      const noteUrl = `${baseUrl}/notes/${updatedNote.id}`;
+      this.googleIndexingService.notifyGoogle(noteUrl).catch((error) => {
+        // Hata loglanır ama işlem devam eder
+        console.error('Google Indexing bildirimi başarısız:', error);
       });
 
       return {

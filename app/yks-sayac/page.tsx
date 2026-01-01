@@ -3,25 +3,17 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { 
-  User, 
-  FileText, 
-  LogOut, 
-  Trophy,
   Clock,
   Calendar,
   Target,
 } from 'lucide-react';
 import { Footer } from '@/components/footer';
+import { SiteHeader } from '@/components/site-header';
 
 export default function YKSSayacPage() {
-  const router = useRouter();
-  const [userRole, setUserRole] = useState<string | null>(null);
-  const [userName, setUserName] = useState<string>('');
-  const [showUserMenu, setShowUserMenu] = useState(false);
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
     hours: 0,
@@ -33,16 +25,15 @@ export default function YKSSayacPage() {
   const yksDate = new Date('2026-06-14T09:00:00'); // Örnek tarih, gerçek tarih açıklandığında güncellenmeli
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        setUserRole(payload.role);
-        setUserName(payload.username || payload.email || 'Kullanıcı');
-      } catch {
-        // JWT decode hatası
-      }
+    // SEO Meta Tags
+    document.title = "2026 YKS Sınav Sayaç | DersNotu.net";
+    let metaDescription = document.querySelector('meta[name="description"]');
+    if (!metaDescription) {
+      metaDescription = document.createElement('meta');
+      metaDescription.setAttribute('name', 'description');
+      document.head.appendChild(metaDescription);
     }
+    metaDescription.setAttribute('content', '2026 YKS sınavına kalan süreyi anlık olarak takip edin. Yükseköğretim Kurumları Sınavı için geri sayım ve hazırlık kaynakları.');
 
     // Sayaç güncelleme
     const updateTimer = () => {
@@ -67,117 +58,10 @@ export default function YKSSayacPage() {
     return () => clearInterval(interval);
   }, []);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
-      if (showUserMenu && !target.closest('.user-menu-container')) {
-        setShowUserMenu(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [showUserMenu]);
-
   return (
     <>
       <div className="min-h-screen bg-[#F9FAFB]">
-        {/* Header */}
-        <header className="sticky top-0 z-50 backdrop-blur-md bg-white/80 border-b border-gray-200/50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-20">
-              {/* Logo - Center */}
-              <div className="flex-1 flex justify-center">
-                <Link href="/" className="flex items-center space-x-3">
-                  <Image 
-                    src="/logo1.png" 
-                    alt="DersNotu.net" 
-                    width={130} 
-                    height={130}
-                    className="object-contain"
-                  />
-                </Link>
-              </div>
-
-              {/* Auth Buttons / User Menu - Right */}
-              <div className="flex-1 flex justify-end items-center space-x-4 ml-4">
-                {!userRole ? (
-                  <>
-                    <Link href="/login">
-                      <Button variant="ghost" className="text-gray-700 hover:text-[#3B82F6]">
-                        Giriş Yap
-                      </Button>
-                    </Link>
-                    <Link href="/register">
-                      <Button className="bg-[#3B82F6] hover:bg-[#2563EB] text-white">
-                        Kayıt Ol
-                      </Button>
-                    </Link>
-                  </>
-                ) : userRole === 'ADMIN' ? (
-                  <Link href="/admin">
-                    <Button variant="outline" size="sm">
-                      Admin Panel
-                    </Button>
-                  </Link>
-                ) : (
-                  <div className="relative user-menu-container">
-                    <button
-                      onClick={() => setShowUserMenu(!showUserMenu)}
-                      className="flex items-center gap-2 p-2 rounded-full hover:bg-gray-100 transition-colors"
-                    >
-                      <div className="h-8 w-8 rounded-full bg-[#3B82F6] flex items-center justify-center text-white font-semibold text-sm">
-                        {userName.charAt(0).toUpperCase()}
-                      </div>
-                    </button>
-                    {showUserMenu && (
-                      <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50 user-menu-container">
-                        <Link 
-                          href="/dashboard" 
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
-                          onClick={() => setShowUserMenu(false)}
-                        >
-                          <FileText className="h-4 w-4" />
-                          Not Yükle
-                        </Link>
-                        <Link 
-                          href="/profile" 
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
-                          onClick={() => setShowUserMenu(false)}
-                        >
-                          <User className="h-4 w-4" />
-                          Profil
-                        </Link>
-                        <Link 
-                          href="/leaderboard" 
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
-                          onClick={() => setShowUserMenu(false)}
-                        >
-                          <Trophy className="h-4 w-4" />
-                          Liderlik Tablosu
-                        </Link>
-                        <button
-                          onClick={() => {
-                            localStorage.removeItem('token');
-                            localStorage.removeItem('userRole');
-                            setUserRole(null);
-                            setUserName('');
-                            setShowUserMenu(false);
-                            router.push('/');
-                          }}
-                          className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
-                        >
-                          <LogOut className="h-4 w-4" />
-                          Çıkış Yap
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </header>
+        <SiteHeader />
 
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           {/* Hero Section */}
