@@ -1,7 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { google } from 'googleapis';
-import * as path from 'path';
-import * as fs from 'fs';
 
 @Injectable()
 export class GoogleIndexingService {
@@ -10,37 +8,35 @@ export class GoogleIndexingService {
 
   constructor() {
     try {
-      // Google servis hesabı anahtarını yükle
-      const keyPath = path.join(__dirname, '../../google-key.json');
-      const key = JSON.parse(fs.readFileSync(keyPath, 'utf8'));
+      // JSON dosyasından okumak yerine ENV'den alıyoruz
+      const clientEmail = process.env.GOOGLE_CLIENT_EMAIL;
+      const privateKey = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n');
 
-      this.jwtClient = new google.auth.JWT(
-        key.client_email,
-        null,
-        key.private_key,
-        ['https://www.googleapis.com/auth/indexing'],
-        null
-      );
-    } catch (error) {
-      this.logger.error('Google Indexing API anahtarı yüklenemedi:', error);
-    }
-  }
-
-  /**
-   * Google'a URL'yi indekslemesi için bildirim gönderir
-   * @param pageUrl İndekslenecek sayfanın tam URL'si
-   */
-  async notifyGoogle(pageUrl: string): Promise<void> {
-    try {
-      if (!this.jwtClient) {
-        this.logger.warn('Google Indexing API anahtarı yüklenemedi, bildirim gönderilemedi');
+      if (!clientEmail || !privateKey) {
+        this.logger.error('Google Indexing API kimlik bilgileri eksik (ENV)!');
         return;
       }
 
-      // JWT token'ı al
+      // TypeScript hatasını önlemek için objeye dayalı yapı kullanıyoruz
+      this.jwtClient = new google.auth.JWT({
+        email: clientEmail,
+        key: privateKey,
+        scopes: ['https://www.googleapis.com/auth/indexing'],
+      });
+    } catch (error) {
+      this.logger.error('Google Indexing API istemcisi oluşturulamadı:', error);
+    }
+  }
+
+  async notifyGoogle(pageUrl: string): Promise<void> {
+    try {
+      if (!this.jwtClient) {
+        this.logger.warn('İndeksleme istemcisi hazır değil, bildirim gönderilemedi.');
+        return;
+      }
+
       const tokens = await this.jwtClient.authorize();
       
-      // Google Indexing API'ye istek gönder
       const response = await fetch('https://indexing.googleapis.com/v1/urlNotifications:publish', {
         method: 'POST',
         headers: {
@@ -53,18 +49,15 @@ export class GoogleIndexingService {
         }),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        this.logger.error('Google Indexing API hatası:', errorData);
-        throw new Error(`Google Indexing API hatası: ${response.status} ${response.statusText}`);
-      }
-
       const data = await response.json();
-      this.logger.log(`Google Indexing API başarılı: ${pageUrl}`, data);
+
+      if (!response.ok) {
+        this.logger.error('Google Indexing API hatası:', data);
+      } else {
+        this.logger.log(`Google Indexing API başarılı: ${pageUrl}`);
+      }
     } catch (error) {
       this.logger.error(`Google Indexing API hatası (${pageUrl}):`, error);
-      // Hata olsa bile işlemi durdurmuyoruz, sadece logluyoruz
     }
   }
 }
-
